@@ -1,0 +1,143 @@
+{
+  "spots": [
+    {
+      "id": "shibuya-counter-bar-001",
+      "title": {
+        "ja": "カウンター席が心地よいクラフトビールバー",
+        "en": "Cozy Counter Craft Beer Bar"
+      },
+      "shortDescription": {
+        "ja": "一人でも気軽に入れる渋谷の隠れ家的クラフトビールバー",
+        "en": "Hidden craft beer bar in Shibuya perfect for solo drinkers"
+      },
+      "description": {
+        "ja": "渋谷の路地裏にある小さなクラフトビールバー。カウンター席中心で一人客も多く、バーテンダーとの会話も楽しめます。地元のクラフトビールから海外の珍しいビールまで豊富な品揃え。",
+        "en": "A small craft beer bar tucked away in Shibuya's back alleys. Mainly counter seating with many solo customers, you can enjoy conversations with the bartender. Great selection from local craft beers to rare international brews."
+      },
+      "images": [],
+      "location": {
+        "lat": 35.6598,
+        "lng": 139.7006,
+        "address": {
+          "ja": "東京都渋谷区渋谷2-10-15",
+          "en": "2-10-15 Shibuya, Shibuya-ku, Tokyo"
+        }
+      },
+      "genre": ["bar", "craft-beer", "drinking"],
+      "travelStyle": ["solo", "nightlife", "local-experience"],
+      "soloFriendly": true,
+      "businessHours": {
+        "ja": "18:00-02:00 (月-土) / 日曜定休",
+        "en": "18:00-02:00 (Mon-Sat) / Closed on Sunday"
+      },
+      "access": {
+        "ja": "渋谷駅から徒歩5分",
+        "en": "5 minutes walk from Shibuya Station"
+      },
+      "tips": {
+        "ja": "英語メニューあり。一人でカウンターに座ってもバーテンダーが気さくに話しかけてくれます。",
+        "en": "English menu available. Solo drinkers at the counter can enjoy friendly conversations with the bartender."
+      },
+      "publishedAt": "2025-01-15",
+      "expiresAt": "2025-03-31",
+      "reactions": {
+        "interested": 23,
+        "visited": 8
+      },
+      "createdBy": "ひとりあそび研究所"
+    },
+    {
+      "id": "asakusa-coffee-temple-002",
+      "title": {
+        "ja": "お寺併設の静寂なカフェ",
+        "en": "Serene Temple Cafe"
+      },
+      "shortDescription": {
+        "ja": "浅草の隠れ家的お寺カフェで一人時間を満喫",
+        "en": "Hidden temple cafe in Asakusa perfect for solo contemplation"
+      },
+      "description": {
+        "ja": "浅草の小さなお寺に併設された静かなカフェ。和の空間で丁寧に淹れたコーヒーと手作りの和菓子が楽しめます。一人で読書をしたり、静かに過ごすのに最適な空間。",
+        "en": "A quiet cafe attached to a small temple in Asakusa. Enjoy carefully brewed coffee and handmade Japanese sweets in a traditional Japanese space. Perfect for solo reading and quiet contemplation."
+      },
+      "images": [],
+      "location": {
+        "lat": 35.7148,
+        "lng": 139.7967,
+        "address": {
+          "ja": "東京都台東区浅草3-18-7",
+          "en": "3-18-7 Asakusa, Taito-ku, Tokyo"
+        }
+      },
+      "genre": ["cafe", "coffee", "culture"],
+      "travelStyle": ["solo", "quiet", "cultural", "mindfulness"],
+      "soloFriendly": true,
+      "businessHours": {
+        "ja": "9:00-17:00 / 水曜定休",
+        "en": "9:00-17:00 / Closed on Wednesday"
+      },
+      "access": {
+        "ja": "浅草駅から徒歩8分",
+        "en": "8 minutes walk from Asakusa Station"
+      },
+      "tips": {
+        "ja": "Wi-Fi完備で作業もOK。お寺の庭園を眺めながらのひとときが格別です。",
+        "en": "Free Wi-Fi available for work. The view of the temple garden while sipping coffee is exceptional."
+      },
+      "publishedAt": "2025-01-10",
+      "expiresAt": "2025-04-15",
+      "reactions": {
+        "interested": 45,
+        "visited": 12
+      },
+      "createdBy": "ひとりあそび研究所"
+    },
+    {
+      "id": "harajuku-vintage-record-003",
+      "title": {
+        "ja": "レコード試聴できる小さな古着店",
+        "en": "Vintage Shop with Record Listening"
+      },
+      "shortDescription": {
+        "ja": "原宿の音楽好きが集まる古着×レコードの複合店",
+        "en": "Harajuku vintage shop where music lovers gather"
+      },
+      "description": {
+        "ja": "原宿の裏原宿エリアにある古着とレコードの小さな店。店内でレコードの試聴ができ、音楽好きの店主やお客さんとの会話が楽しめます。一人でふらっと立ち寄るのにぴったり。",
+        "en": "A small vintage clothing and record shop in Harajuku's back streets. You can listen to records in-store and enjoy conversations with the music-loving owner and customers. Perfect for a casual solo visit."
+      },
+      "images": [],
+      "location": {
+        "lat": 35.6702,
+        "lng": 139.7016,
+        "address": {
+          "ja": "東京都渋谷区神宮前4-26-18",
+          "en": "4-26-18 Jingumae, Shibuya-ku, Tokyo"
+        }
+      },
+      "genre": ["shopping", "music", "vintage", "culture"],
+      "travelStyle": ["solo", "creative", "music", "alternative"],
+      "soloFriendly": true,
+      "businessHours": {
+        "ja": "12:00-20:00 / 月曜定休",
+        "en": "12:00-20:00 / Closed on Monday"
+      },
+      "access": {
+        "ja": "原宿駅から徒歩6分",
+        "en": "6 minutes walk from Harajuku Station"
+      },
+      "tips": {
+        "ja": "店主は英語も話せます。レコードの試聴は自由で、気に入ったものがあれば購入も可能。",
+        "en": "The owner speaks English. Record listening is free, and you can purchase anything you like."
+      },
+      "publishedAt": "2025-01-12",
+      "expiresAt": "2025-03-20",
+      "reactions": {
+        "interested": 31,
+        "visited": 5
+      },
+      "createdBy": "ひとりあそび研究所"
+    }
+  ],
+  "lastUpdated": "2025-01-19"
+}
