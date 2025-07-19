@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Spot } from '@/types/spot';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getLocalizedContent } from '@/lib/i18n';
+import { generateGoogleMapsUrl } from '@/lib/maps';
+import { getLocalizedTag } from '@/lib/tags';
 
 interface SpotCardProps {
   spot: Spot;
@@ -56,9 +58,17 @@ export function SpotCard({ spot }: SpotCardProps) {
       
       <CardContent>
         <div className="flex flex-wrap gap-1 mb-3">
-          {spot.genre.slice(0, 2).map((genre) => (
+          <Badge variant="genre" className="text-xs bg-purple-100 text-purple-800">
+            {getLocalizedTag(spot.primaryCategory, language)}
+          </Badge>
+          {spot.genre.slice(0, 1).map((genre) => (
             <Badge key={genre} variant="genre" className="text-xs">
-              {genre}
+              {getLocalizedTag(genre, language)}
+            </Badge>
+          ))}
+          {spot.travelStyle.slice(0, 1).map((style) => (
+            <Badge key={style} variant="default" className="text-xs bg-green-100 text-green-800">
+              {getLocalizedTag(style, language)}
             </Badge>
           ))}
         </div>
@@ -70,11 +80,24 @@ export function SpotCard({ spot }: SpotCardProps) {
             <span>❤️ {spot.reactions.interested}</span>
             <span>✅ {spot.reactions.visited}</span>
           </div>
-          <Link href={`/spots/${spot.id}`}>
-            <Button size="sm">
-              {language === 'ja' ? '詳細' : 'Details'}
-            </Button>
-          </Link>
+          <div className="flex space-x-2">
+            {!spot.location.hideExactLocation && (
+              <a
+                href={generateGoogleMapsUrl(spot)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:text-blue-800 text-sm"
+                title={language === 'ja' ? '地図で見る' : 'View on Map'}
+              >
+                📍
+              </a>
+            )}
+            <Link href={`/spots/${spot.id}`}>
+              <Button size="sm">
+                {language === 'ja' ? '詳細' : 'Details'}
+              </Button>
+            </Link>
+          </div>
         </div>
       </CardContent>
     </Card>

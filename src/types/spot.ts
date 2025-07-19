@@ -16,11 +16,13 @@ export interface Spot {
   location: {
     lat: number;
     lng: number;
+    hideExactLocation: boolean;
     address: {
       ja: string;
       en: string;
     };
   };
+  primaryCategory: string;
   genre: string[];
   travelStyle: string[];
   soloFriendly: boolean;

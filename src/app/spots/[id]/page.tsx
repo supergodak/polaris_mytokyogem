@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import { getSpotById } from '@/lib/data';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getLocalizedContent } from '@/lib/i18n';
+import { generateGoogleMapsUrl, generateGoogleMapsDirectionsUrl } from '@/lib/maps';
+import { getLocalizedTag } from '@/lib/tags';
 
 export default function SpotDetailPage() {
   const params = useParams();
@@ -62,14 +64,17 @@ export default function SpotDetailPage() {
           </div>
 
           <div className="flex flex-wrap gap-2 mb-4">
-            {spot.soloFriendly && (
-              <Badge variant="solo">
-                {language === 'ja' ? '一人旅向け' : 'Solo Friendly'}
-              </Badge>
-            )}
+            <Badge variant="genre" className="bg-purple-100 text-purple-800">
+              {getLocalizedTag(spot.primaryCategory, language)}
+            </Badge>
             {spot.genre.map((genre) => (
               <Badge key={genre} variant="genre">
-                {genre}
+                {getLocalizedTag(genre, language)}
+              </Badge>
+            ))}
+            {spot.travelStyle.slice(0, 3).map((style) => (
+              <Badge key={style} variant="default" className="bg-green-100 text-green-800">
+                {getLocalizedTag(style, language)}
               </Badge>
             ))}
           </div>
@@ -104,6 +109,31 @@ export default function SpotDetailPage() {
                 </h4>
                 <p className="text-gray-600">{access}</p>
               </div>
+              {!spot.location.hideExactLocation && (
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-2">
+                    {language === 'ja' ? '地図' : 'Map'}
+                  </h4>
+                  <div className="flex space-x-2">
+                    <a
+                      href={generateGoogleMapsUrl(spot)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                    >
+                      📍 {language === 'ja' ? '地図で見る' : 'View on Map'}
+                    </a>
+                    <a
+                      href={generateGoogleMapsDirectionsUrl(spot)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+                    >
+                      🚶 {language === 'ja' ? '経路案内' : 'Directions'}
+                    </a>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
 

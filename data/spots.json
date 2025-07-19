@@ -18,13 +18,15 @@
       "location": {
         "lat": 35.6598,
         "lng": 139.7006,
+        "hideExactLocation": false,
         "address": {
           "ja": "東京都渋谷区渋谷2-10-15",
           "en": "2-10-15 Shibuya, Shibuya-ku, Tokyo"
         }
       },
-      "genre": ["bar", "craft-beer", "drinking"],
-      "travelStyle": ["solo", "nightlife", "local-experience"],
+      "primaryCategory": "bar",
+      "genre": ["craft-beer", "standing-bar", "izakaya"],
+      "travelStyle": ["solo-friendly", "evening", "local-experience", "cozy", "english-menu"],
       "soloFriendly": true,
       "businessHours": {
         "ja": "18:00-02:00 (月-土) / 日曜定休",
@@ -64,13 +66,15 @@
       "location": {
         "lat": 35.7148,
         "lng": 139.7967,
+        "hideExactLocation": true,
         "address": {
-          "ja": "東京都台東区浅草3-18-7",
-          "en": "3-18-7 Asakusa, Taito-ku, Tokyo"
+          "ja": "浅草エリア（詳細位置は非公開）",
+          "en": "Asakusa Area (Exact location private)"
         }
       },
-      "genre": ["cafe", "coffee", "culture"],
-      "travelStyle": ["solo", "quiet", "cultural", "mindfulness"],
+      "primaryCategory": "cafe",
+      "genre": ["coffee", "tea", "traditional", "temple-shrine"],
+      "travelStyle": ["solo-friendly", "quiet", "peaceful", "meditation", "reading", "wifi", "morning"],
       "soloFriendly": true,
       "businessHours": {
         "ja": "9:00-17:00 / 水曜定休",
@@ -110,13 +114,15 @@
       "location": {
         "lat": 35.6702,
         "lng": 139.7016,
+        "hideExactLocation": false,
         "address": {
           "ja": "東京都渋谷区神宮前4-26-18",
           "en": "4-26-18 Jingumae, Shibuya-ku, Tokyo"
         }
       },
-      "genre": ["shopping", "music", "vintage", "culture"],
-      "travelStyle": ["solo", "creative", "music", "alternative"],
+      "primaryCategory": "shopping",
+      "genre": ["vintage", "music", "vinyl", "fashion", "subculture"],
+      "travelStyle": ["solo-friendly", "unique", "underground", "artistic", "authentic", "afternoon"],
       "soloFriendly": true,
       "businessHours": {
         "ja": "12:00-20:00 / 月曜定休",
