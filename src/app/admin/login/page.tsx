@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import Image from 'next/image';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
@@ -47,8 +48,17 @@ export default function AdminLogin() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <Card className="w-full max-w-md">
         <CardHeader>
+          <div className="flex justify-center mb-4">
+            <Image
+              src="/mytokyogem_logo.png"
+              alt="MyTokyoGem Logo"
+              width={48}
+              height={48}
+              className="w-12 h-12"
+            />
+          </div>
           <h1 className="text-2xl font-bold text-center">管理画面ログイン</h1>
-          <p className="text-center text-gray-600">MyTokyoGem Admin</p>
+          <p className="text-center text-gray-600">マイ・トーキョー・ジェム Admin</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">

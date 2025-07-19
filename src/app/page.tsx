@@ -1,12 +1,35 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { SpotCard } from '@/components/features/spot-card';
-import { getAllSpots } from '@/lib/data';
+import { getAllSpotsSync } from '@/lib/data';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { Spot } from '@/types/spot';
 
 export default function Home() {
   const { language } = useLanguage();
-  const spots = getAllSpots();
+  const [spots, setSpots] = useState<Spot[]>(getAllSpotsSync());
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchSpots = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch('/api/spots');
+        if (response.ok) {
+          const data = await response.json();
+          setSpots(data.spots);
+        }
+      } catch (error) {
+        console.error('Error fetching spots:', error);
+        // フォールバックとして既存データを使用
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSpots();
+  }, []);
 
   const heading = language === 'ja' 
     ? '東京の隠れたジェム' 

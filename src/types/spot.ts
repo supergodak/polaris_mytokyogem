@@ -38,13 +38,13 @@ export interface Spot {
     ja: string;
     en: string;
   };
-  publishedAt: string;
-  expiresAt: string;
+  isHidden: boolean;
   reactions: {
     interested: number;
     visited: number;
   };
   createdBy: string;
+  createdAt: string;
 }
 
 export interface SpotList {

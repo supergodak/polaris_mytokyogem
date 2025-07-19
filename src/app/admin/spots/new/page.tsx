@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -50,14 +50,22 @@ interface SpotFormData {
     ja: string;
     en: string;
   };
-  publishedAt: string;
-  expiresAt: string;
+  isHidden: boolean;
 }
 
 export default function NewSpotPage() {
   const { data: session } = useSession();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [translating, setTranslating] = useState<Record<string, boolean>>({
+    title: false,
+    description: false,
+    shortDescription: false,
+    businessHours: false,
+    access: false,
+    tips: false,
+    address: false
+  });
   const [formData, setFormData] = useState<SpotFormData>({
     title: { ja: '', en: '' },
     description: { ja: '', en: '' },
@@ -76,12 +84,16 @@ export default function NewSpotPage() {
     businessHours: { ja: '', en: '' },
     access: { ja: '', en: '' },
     tips: { ja: '', en: '' },
-    publishedAt: new Date().toISOString().split('T')[0],
-    expiresAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+    isHidden: false
   });
 
+  useEffect(() => {
+    if (session && !session.user) {
+      router.push('/admin/login');
+    }
+  }, [session, router]);
+
   if (!session?.user) {
-    router.push('/admin/login');
     return null;
   }
 
@@ -126,20 +138,113 @@ export default function NewSpotPage() {
     }));
   };
 
+  // リアルタイム翻訳機能
+  const translateField = async (fieldType: string, jaValue: string, enValue: string) => {
+    // 日本語が入力済み かつ 英語が空の場合のみ翻訳
+    if (!jaValue.trim() || enValue.trim()) {
+      return;
+    }
+
+    setTranslating(prev => ({ ...prev, [fieldType]: true }));
+
+    try {
+      const response = await fetch('/api/translate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text: jaValue,
+          fieldType: fieldType
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Translation failed');
+      }
+
+      const { translatedText } = await response.json();
+
+      // 翻訳結果を英語フィールドに自動入力
+      if (fieldType === 'address') {
+        handleLocationAddressChange('en', translatedText);
+      } else {
+        handleInputChange(fieldType, translatedText, 'en');
+      }
+
+      console.log(`Translated ${fieldType}: "${jaValue}" -> "${translatedText}"`);
+    } catch (error) {
+      console.error(`Translation failed for ${fieldType}:`, error);
+      // 翻訳失敗時は何もしない（既存のフォールバック機能が動作）
+    } finally {
+      setTranslating(prev => ({ ...prev, [fieldType]: false }));
+    }
+  };
+
+  // 日本語フィールドのblurハンドラー
+  const handleJapaneseFieldBlur = (fieldType: string, jaValue: string) => {
+    if (fieldType === 'address') {
+      translateField('address', jaValue, formData.location.address.en);
+    } else {
+      const enValue = (formData as any)[fieldType]?.en || '';
+      translateField(fieldType, jaValue, enValue);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      // TODO: 実際のAPI呼び出しを実装
-      console.log('Form data:', formData);
+      let imageUrls: string[] = [];
+
+      // 1. 画像のアップロード
+      if (formData.images.length > 0) {
+        const imageFormData = new FormData();
+        formData.images.forEach((file) => {
+          imageFormData.append('images', file);
+        });
+
+        const uploadResponse = await fetch('/api/upload', {
+          method: 'POST',
+          body: imageFormData,
+        });
+
+        if (!uploadResponse.ok) {
+          const errorData = await uploadResponse.json();
+          throw new Error(errorData.error || '画像のアップロードに失敗しました');
+        }
+
+        const uploadData = await uploadResponse.json();
+        imageUrls = uploadData.urls;
+      }
+
+      // 2. スポットデータの作成
+      const spotData = {
+        ...formData,
+        images: imageUrls
+      };
+
+      const spotResponse = await fetch('/api/spots', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(spotData),
+      });
+
+      if (!spotResponse.ok) {
+        const errorData = await spotResponse.json();
+        throw new Error(errorData.error || 'スポットの保存に失敗しました');
+      }
+
+      const spotResult = await spotResponse.json();
       
-      // 仮の処理 - 実際にはAPI経由でJSONファイルを更新
-      alert('スポットが登録されました（開発中のため仮実装）');
+      alert('スポットが正常に登録されました！');
       router.push('/admin');
     } catch (error) {
       console.error('Error saving spot:', error);
-      alert('保存に失敗しました');
+      alert(error instanceof Error ? error.message : '保存に失敗しました');
     } finally {
       setIsLoading(false);
     }
@@ -171,6 +276,7 @@ export default function NewSpotPage() {
                   required
                   value={formData.title.ja}
                   onChange={(e) => handleInputChange('title', e.target.value, 'ja')}
+                  onBlur={(e) => handleJapaneseFieldBlur('title', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="例: カウンター席が心地よいクラフトビールバー"
                 />
@@ -179,13 +285,21 @@ export default function NewSpotPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   タイトル（英語）
                 </label>
-                <input
-                  type="text"
-                  value={formData.title.en}
-                  onChange={(e) => handleInputChange('title', e.target.value, 'en')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="AI翻訳で自動生成されます"
-                />
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={formData.title.en}
+                    onChange={(e) => handleInputChange('title', e.target.value, 'en')}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder={translating.title ? "翻訳中..." : "AI翻訳で自動生成されます"}
+                    disabled={translating.title}
+                  />
+                  {translating.title && (
+                    <div className="absolute right-2 top-2 text-blue-500">
+                      <span className="animate-spin inline-block">⟳</span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -199,6 +313,7 @@ export default function NewSpotPage() {
                   rows={3}
                   value={formData.shortDescription.ja}
                   onChange={(e) => handleInputChange('shortDescription', e.target.value, 'ja')}
+                  onBlur={(e) => handleJapaneseFieldBlur('shortDescription', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="一覧ページで表示される短い説明"
                 />
@@ -207,13 +322,21 @@ export default function NewSpotPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   短い説明（英語）
                 </label>
-                <textarea
-                  rows={3}
-                  value={formData.shortDescription.en}
-                  onChange={(e) => handleInputChange('shortDescription', e.target.value, 'en')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="AI翻訳で自動生成されます"
-                />
+                <div className="relative">
+                  <textarea
+                    rows={3}
+                    value={formData.shortDescription.en}
+                    onChange={(e) => handleInputChange('shortDescription', e.target.value, 'en')}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder={translating.shortDescription ? "翻訳中..." : "AI翻訳で自動生成されます"}
+                    disabled={translating.shortDescription}
+                  />
+                  {translating.shortDescription && (
+                    <div className="absolute right-2 top-2 text-blue-500">
+                      <span className="animate-spin inline-block">⟳</span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -227,6 +350,7 @@ export default function NewSpotPage() {
                   rows={5}
                   value={formData.description.ja}
                   onChange={(e) => handleInputChange('description', e.target.value, 'ja')}
+                  onBlur={(e) => handleJapaneseFieldBlur('description', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="詳細ページで表示される詳しい説明"
                 />
@@ -235,13 +359,21 @@ export default function NewSpotPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   詳細説明（英語）
                 </label>
-                <textarea
-                  rows={5}
-                  value={formData.description.en}
-                  onChange={(e) => handleInputChange('description', e.target.value, 'en')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="AI翻訳で自動生成されます"
-                />
+                <div className="relative">
+                  <textarea
+                    rows={5}
+                    value={formData.description.en}
+                    onChange={(e) => handleInputChange('description', e.target.value, 'en')}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder={translating.description ? "翻訳中..." : "AI翻訳で自動生成されます"}
+                    disabled={translating.description}
+                  />
+                  {translating.description && (
+                    <div className="absolute right-2 top-2 text-blue-500">
+                      <span className="animate-spin inline-block">⟳</span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </CardContent>
@@ -349,6 +481,7 @@ export default function NewSpotPage() {
                   required
                   value={formData.location.address.ja}
                   onChange={(e) => handleLocationAddressChange('ja', e.target.value)}
+                  onBlur={(e) => handleJapaneseFieldBlur('address', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="東京都渋谷区渋谷2-10-15"
                 />
@@ -357,13 +490,21 @@ export default function NewSpotPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   住所（英語）
                 </label>
-                <input
-                  type="text"
-                  value={formData.location.address.en}
-                  onChange={(e) => handleLocationAddressChange('en', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="AI翻訳で自動生成されます"
-                />
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={formData.location.address.en}
+                    onChange={(e) => handleLocationAddressChange('en', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder={translating.address ? "翻訳中..." : "AI翻訳で自動生成されます"}
+                    disabled={translating.address}
+                  />
+                  {translating.address && (
+                    <div className="absolute right-2 top-2 text-blue-500">
+                      <span className="animate-spin inline-block">⟳</span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -397,6 +538,7 @@ export default function NewSpotPage() {
                   type="text"
                   value={formData.businessHours.ja}
                   onChange={(e) => handleInputChange('businessHours', e.target.value, 'ja')}
+                  onBlur={(e) => handleJapaneseFieldBlur('businessHours', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="例: 18:00-02:00 (月-土) / 日曜定休"
                 />
@@ -405,13 +547,21 @@ export default function NewSpotPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   営業時間（英語）
                 </label>
-                <input
-                  type="text"
-                  value={formData.businessHours.en}
-                  onChange={(e) => handleInputChange('businessHours', e.target.value, 'en')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="AI翻訳で自動生成されます"
-                />
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={formData.businessHours.en}
+                    onChange={(e) => handleInputChange('businessHours', e.target.value, 'en')}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder={translating.businessHours ? "翻訳中..." : "AI翻訳で自動生成されます"}
+                    disabled={translating.businessHours}
+                  />
+                  {translating.businessHours && (
+                    <div className="absolute right-2 top-2 text-blue-500">
+                      <span className="animate-spin inline-block">⟳</span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -424,6 +574,7 @@ export default function NewSpotPage() {
                   type="text"
                   value={formData.access.ja}
                   onChange={(e) => handleInputChange('access', e.target.value, 'ja')}
+                  onBlur={(e) => handleJapaneseFieldBlur('access', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="例: 渋谷駅から徒歩5分"
                 />
@@ -432,13 +583,21 @@ export default function NewSpotPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   アクセス（英語）
                 </label>
-                <input
-                  type="text"
-                  value={formData.access.en}
-                  onChange={(e) => handleInputChange('access', e.target.value, 'en')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="AI翻訳で自動生成されます"
-                />
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={formData.access.en}
+                    onChange={(e) => handleInputChange('access', e.target.value, 'en')}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder={translating.access ? "翻訳中..." : "AI翻訳で自動生成されます"}
+                    disabled={translating.access}
+                  />
+                  {translating.access && (
+                    <div className="absolute right-2 top-2 text-blue-500">
+                      <span className="animate-spin inline-block">⟳</span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -451,6 +610,7 @@ export default function NewSpotPage() {
                   rows={3}
                   value={formData.tips.ja}
                   onChange={(e) => handleInputChange('tips', e.target.value, 'ja')}
+                  onBlur={(e) => handleJapaneseFieldBlur('tips', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="一人で楽しむためのコツやアドバイス"
                 />
@@ -459,48 +619,47 @@ export default function NewSpotPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   ひとりあそびのコツ（英語）
                 </label>
-                <textarea
-                  rows={3}
-                  value={formData.tips.en}
-                  onChange={(e) => handleInputChange('tips', e.target.value, 'en')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="AI翻訳で自動生成されます"
-                />
+                <div className="relative">
+                  <textarea
+                    rows={3}
+                    value={formData.tips.en}
+                    onChange={(e) => handleInputChange('tips', e.target.value, 'en')}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder={translating.tips ? "翻訳中..." : "AI翻訳で自動生成されます"}
+                    disabled={translating.tips}
+                  />
+                  {translating.tips && (
+                    <div className="absolute right-2 top-2 text-blue-500">
+                      <span className="animate-spin inline-block">⟳</span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* 公開設定 */}
+        {/* 表示設定 */}
         <Card>
           <CardHeader>
-            <h2 className="text-xl font-semibold">公開設定</h2>
+            <h2 className="text-xl font-semibold">表示設定</h2>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  公開開始日
-                </label>
-                <input
-                  type="date"
-                  value={formData.publishedAt}
-                  onChange={(e) => handleInputChange('publishedAt', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  公開終了日
-                </label>
-                <input
-                  type="date"
-                  value={formData.expiresAt}
-                  onChange={(e) => handleInputChange('expiresAt', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
+          <CardContent>
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="isHidden"
+                checked={formData.isHidden}
+                onChange={(e) => handleInputChange('isHidden', e.target.checked)}
+                className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <label htmlFor="isHidden" className="ml-2 text-sm text-gray-700">
+                非表示にする（下書き保存）
+              </label>
             </div>
+            <p className="text-xs text-gray-500 mt-1">
+              チェックすると一般ユーザーには表示されません
+            </p>
           </CardContent>
         </Card>
 

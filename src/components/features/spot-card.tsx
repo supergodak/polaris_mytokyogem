@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -10,6 +11,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { getLocalizedContent } from '@/lib/i18n';
 import { generateGoogleMapsUrl } from '@/lib/maps';
 import { getLocalizedTag } from '@/lib/tags';
+import { useFavorites } from '@/hooks/useFavorites';
 
 interface SpotCardProps {
   spot: Spot;
@@ -17,10 +19,28 @@ interface SpotCardProps {
 
 export function SpotCard({ spot }: SpotCardProps) {
   const { language } = useLanguage();
+  const { toggleFavorite, isFavorite } = useFavorites();
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [currentReactions, setCurrentReactions] = useState(spot.reactions);
   
   const title = getLocalizedContent(spot.title, language);
   const shortDescription = getLocalizedContent(spot.shortDescription, language);
   const address = getLocalizedContent(spot.location.address, language);
+
+  const handleFavoriteClick = async (e: React.MouseEvent) => {
+    e.preventDefault(); // リンクのクリックを防ぐ
+    if (isUpdating) return;
+
+    setIsUpdating(true);
+    try {
+      const newReactions = await toggleFavorite(spot.id);
+      setCurrentReactions(newReactions);
+    } catch (error) {
+      console.error('Failed to toggle favorite:', error);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
   return (
     <Card className="h-full">
@@ -76,9 +96,21 @@ export function SpotCard({ spot }: SpotCardProps) {
         <p className="text-xs text-gray-500 mb-3">{address}</p>
         
         <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-3 text-xs text-gray-500">
-            <span>❤️ {spot.reactions.interested}</span>
-            <span>✅ {spot.reactions.visited}</span>
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={handleFavoriteClick}
+              disabled={isUpdating}
+              className={`flex items-center space-x-1 px-3 py-1 rounded-full text-sm transition-all ${
+                isFavorite(spot.id)
+                  ? 'bg-red-100 text-red-600 hover:bg-red-200'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              } ${isUpdating ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+            >
+              <span className="text-base">{isFavorite(spot.id) ? '❤️' : '🤍'}</span>
+              <span>{currentReactions.interested}</span>
+            </button>
+            {/* 行ってきたは一旦非表示 */}
+            {/* <span className="text-xs text-gray-500">✅ {currentReactions.visited}</span> */}
           </div>
           <div className="flex space-x-2">
             {!spot.location.hideExactLocation && (

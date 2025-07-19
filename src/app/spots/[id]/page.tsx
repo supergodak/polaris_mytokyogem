@@ -1,21 +1,27 @@
 'use client';
 
+import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { ImageGallery } from '@/components/ui/image-gallery';
 import { getSpotById } from '@/lib/data';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getLocalizedContent } from '@/lib/i18n';
 import { generateGoogleMapsUrl, generateGoogleMapsDirectionsUrl } from '@/lib/maps';
 import { getLocalizedTag } from '@/lib/tags';
+import { useFavorites } from '@/hooks/useFavorites';
 
 export default function SpotDetailPage() {
   const params = useParams();
   const { language } = useLanguage();
+  const { toggleFavorite, isFavorite } = useFavorites();
   const spot = getSpotById(params.id as string);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [currentReactions, setCurrentReactions] = useState(spot?.reactions || { interested: 0, visited: 0 });
 
   if (!spot) {
     return (
@@ -39,6 +45,20 @@ export default function SpotDetailPage() {
   const access = getLocalizedContent(spot.access, language);
   const tips = getLocalizedContent(spot.tips, language);
 
+  const handleFavoriteClick = async () => {
+    if (isUpdating) return;
+
+    setIsUpdating(true);
+    try {
+      const newReactions = await toggleFavorite(spot.id);
+      setCurrentReactions(newReactions);
+    } catch (error) {
+      console.error('Failed to toggle favorite:', error);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <Link href="/" className="inline-flex items-center text-blue-600 hover:text-blue-800 mb-6">
@@ -48,20 +68,12 @@ export default function SpotDetailPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div>
-          <div className="relative h-64 w-full mb-4">
-            {spot.images[0] ? (
-              <Image
-                src={spot.images[0]}
-                alt={title}
-                fill
-                className="object-cover rounded-lg"
-              />
-            ) : (
-              <div className="w-full h-full bg-gray-200 rounded-lg flex items-center justify-center">
-                <span className="text-gray-400">No Image</span>
-              </div>
-            )}
-          </div>
+          {/* 画像ギャラリー */}
+          <ImageGallery 
+            images={spot.images} 
+            alt={title}
+            className="mb-4"
+          />
 
           <div className="flex flex-wrap gap-2 mb-4">
             <Badge variant="genre" className="bg-purple-100 text-purple-800">
@@ -81,7 +93,24 @@ export default function SpotDetailPage() {
         </div>
 
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">{title}</h1>
+          <div className="flex items-start justify-between mb-4">
+            <h1 className="text-3xl font-bold text-gray-900">{title}</h1>
+            <button
+              onClick={handleFavoriteClick}
+              disabled={isUpdating}
+              className={`flex items-center space-x-2 px-6 py-3 rounded-full text-base transition-all ${
+                isFavorite(spot.id)
+                  ? 'bg-red-100 text-red-600 hover:bg-red-200'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              } ${isUpdating ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+            >
+              <span className="text-xl">{isFavorite(spot.id) ? '❤️' : '🤍'}</span>
+              <span>
+                {language === 'ja' ? '気になる' : 'Favorite'}
+                <span className="ml-1">({currentReactions.interested})</span>
+              </span>
+            </button>
+          </div>
           <p className="text-gray-700 mb-6">{description}</p>
 
           <Card className="mb-6">
@@ -149,7 +178,8 @@ export default function SpotDetailPage() {
           </Card>
 
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+            {/* 行ってきたボタンは一旦非表示 */}
+            {/* <div className="flex items-center space-x-4">
               <button className="flex items-center space-x-2 text-red-600 hover:text-red-800">
                 <span>❤️</span>
                 <span>{spot.reactions.interested}</span>
@@ -160,7 +190,8 @@ export default function SpotDetailPage() {
                 <span>{spot.reactions.visited}</span>
                 <span className="text-sm">{language === 'ja' ? '行ってきた' : 'Visited'}</span>
               </button>
-            </div>
+            </div> */}
+            <div></div>
             <Button variant="outline">
               {language === 'ja' ? 'シェア' : 'Share'}
             </Button>

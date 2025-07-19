@@ -2,16 +2,18 @@
 
 import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { getAllSpots } from '@/lib/data';
+import { getAllSpotsForAdmin } from '@/lib/data';
+import { Spot } from '@/types/spot';
 
 export default function AdminDashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const spots = getAllSpots();
+  const [spots, setSpots] = useState<Spot[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -20,7 +22,25 @@ export default function AdminDashboard() {
     }
   }, [session, status, router]);
 
-  if (status === 'loading') {
+  useEffect(() => {
+    const fetchSpots = async () => {
+      try {
+        // 管理画面では非表示スポットも含めて表示
+        const spotsData = getAllSpotsForAdmin();
+        setSpots(spotsData);
+      } catch (error) {
+        console.error('Error fetching spots:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (session?.user) {
+      fetchSpots();
+    }
+  }, [session]);
+
+  if (status === 'loading' || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div>読み込み中...</div>
@@ -37,7 +57,7 @@ export default function AdminDashboard() {
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">管理画面</h1>
-          <p className="text-gray-600">MyTokyoGem スポット管理</p>
+          <p className="text-gray-600">マイ・トーキョー・ジェム スポット管理</p>
         </div>
         <div className="flex items-center space-x-4">
           <span className="text-sm text-gray-500">
@@ -108,9 +128,8 @@ export default function AdminDashboard() {
                 <tr className="border-b">
                   <th className="text-left p-4">タイトル</th>
                   <th className="text-left p-4">ジャンル</th>
-                  <th className="text-left p-4">一人旅向け</th>
+                  <th className="text-left p-4">状態</th>
                   <th className="text-left p-4">いいね</th>
-                  <th className="text-left p-4">訪問</th>
                   <th className="text-left p-4">作成日</th>
                   <th className="text-left p-4">操作</th>
                 </tr>
@@ -134,15 +153,23 @@ export default function AdminDashboard() {
                       </div>
                     </td>
                     <td className="p-4">
-                      {spot.soloFriendly ? (
-                        <span className="text-green-600">✓</span>
-                      ) : (
-                        <span className="text-gray-400">-</span>
-                      )}
+                      <div className="flex items-center space-x-2">
+                        {spot.isHidden && (
+                          <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">
+                            非表示
+                          </span>
+                        )}
+                        {spot.soloFriendly && (
+                          <span className="px-2 py-1 bg-green-100 text-green-600 text-xs rounded">
+                            一人旅向け
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="p-4">{spot.reactions.interested}</td>
-                    <td className="p-4">{spot.reactions.visited}</td>
-                    <td className="p-4 text-sm text-gray-500">{spot.publishedAt}</td>
+                    <td className="p-4 text-sm text-gray-500">
+                      {spot.createdAt ? new Date(spot.createdAt).toLocaleDateString('ja-JP') : '-'}
+                    </td>
                     <td className="p-4">
                       <div className="flex space-x-2">
                         <Link href={`/admin/spots/${spot.id}/edit`}>

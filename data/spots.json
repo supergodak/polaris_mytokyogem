@@ -3,8 +3,8 @@
     {
       "id": "shibuya-counter-bar-001",
       "title": {
-        "ja": "カウンター席が心地よいクラフトビールバー",
-        "en": "Cozy Counter Craft Beer Bar"
+        "ja": "カウンター席が心地よいクラフトビールバー2",
+        "en": "Cozy Counter Craft Beer Bar 2"
       },
       "shortDescription": {
         "ja": "一人でも気軽に入れる渋谷の隠れ家的クラフトビールバー",
@@ -14,7 +14,13 @@
         "ja": "渋谷の路地裏にある小さなクラフトビールバー。カウンター席中心で一人客も多く、バーテンダーとの会話も楽しめます。地元のクラフトビールから海外の珍しいビールまで豊富な品揃え。",
         "en": "A small craft beer bar tucked away in Shibuya's back alleys. Mainly counter seating with many solo customers, you can enjoy conversations with the bartender. Great selection from local craft beers to rare international brews."
       },
-      "images": [],
+      "images": [
+        "/uploads/1752960804210_IMG_1977.jpeg",
+        "/uploads/1752960804215_IMG_1976.jpeg",
+        "/uploads/1752960804218_IMG_1975.jpeg",
+        "/uploads/1752960804220_IMG_1974.jpeg",
+        "/uploads/1752960804228_IMG_1973.jpeg"
+      ],
       "location": {
         "lat": 35.6598,
         "lng": 139.7006,
@@ -25,8 +31,18 @@
         }
       },
       "primaryCategory": "bar",
-      "genre": ["craft-beer", "standing-bar", "izakaya"],
-      "travelStyle": ["solo-friendly", "evening", "local-experience", "cozy", "english-menu"],
+      "genre": [
+        "craft-beer",
+        "standing-bar",
+        "izakaya"
+      ],
+      "travelStyle": [
+        "solo-friendly",
+        "evening",
+        "local-experience",
+        "cozy",
+        "english-menu"
+      ],
       "soloFriendly": true,
       "businessHours": {
         "ja": "18:00-02:00 (月-土) / 日曜定休",
@@ -40,13 +56,13 @@
         "ja": "英語メニューあり。一人でカウンターに座ってもバーテンダーが気さくに話しかけてくれます。",
         "en": "English menu available. Solo drinkers at the counter can enjoy friendly conversations with the bartender."
       },
-      "publishedAt": "2025-01-15",
-      "expiresAt": "2025-03-31",
+      "isHidden": true,
       "reactions": {
-        "interested": 23,
+        "interested": 24,
         "visited": 8
       },
-      "createdBy": "ひとりあそび研究所"
+      "createdBy": "ひとりあそび研究所",
+      "createdAt": "2025-01-15T09:00:00.000Z"
     },
     {
       "id": "asakusa-coffee-temple-002",
@@ -73,8 +89,21 @@
         }
       },
       "primaryCategory": "cafe",
-      "genre": ["coffee", "tea", "traditional", "temple-shrine"],
-      "travelStyle": ["solo-friendly", "quiet", "peaceful", "meditation", "reading", "wifi", "morning"],
+      "genre": [
+        "coffee",
+        "tea",
+        "traditional",
+        "temple-shrine"
+      ],
+      "travelStyle": [
+        "solo-friendly",
+        "quiet",
+        "peaceful",
+        "meditation",
+        "reading",
+        "wifi",
+        "morning"
+      ],
       "soloFriendly": true,
       "businessHours": {
         "ja": "9:00-17:00 / 水曜定休",
@@ -88,13 +117,13 @@
         "ja": "Wi-Fi完備で作業もOK。お寺の庭園を眺めながらのひとときが格別です。",
         "en": "Free Wi-Fi available for work. The view of the temple garden while sipping coffee is exceptional."
       },
-      "publishedAt": "2025-01-10",
-      "expiresAt": "2025-04-15",
+      "isHidden": true,
       "reactions": {
         "interested": 45,
         "visited": 12
       },
-      "createdBy": "ひとりあそび研究所"
+      "createdBy": "ひとりあそび研究所",
+      "createdAt": "2025-01-15T09:00:00.000Z"
     },
     {
       "id": "harajuku-vintage-record-003",
@@ -121,8 +150,21 @@
         }
       },
       "primaryCategory": "shopping",
-      "genre": ["vintage", "music", "vinyl", "fashion", "subculture"],
-      "travelStyle": ["solo-friendly", "unique", "underground", "artistic", "authentic", "afternoon"],
+      "genre": [
+        "vintage",
+        "music",
+        "vinyl",
+        "fashion",
+        "subculture"
+      ],
+      "travelStyle": [
+        "solo-friendly",
+        "unique",
+        "underground",
+        "artistic",
+        "authentic",
+        "afternoon"
+      ],
       "soloFriendly": true,
       "businessHours": {
         "ja": "12:00-20:00 / 月曜定休",
@@ -136,14 +178,120 @@
         "ja": "店主は英語も話せます。レコードの試聴は自由で、気に入ったものがあれば購入も可能。",
         "en": "The owner speaks English. Record listening is free, and you can purchase anything you like."
       },
-      "publishedAt": "2025-01-12",
-      "expiresAt": "2025-03-20",
+      "isHidden": true,
       "reactions": {
         "interested": 31,
         "visited": 5
       },
-      "createdBy": "ひとりあそび研究所"
+      "createdBy": "ひとりあそび研究所",
+      "createdAt": "2025-01-15T09:00:00.000Z"
+    },
+    {
+      "id": "bar--682052",
+      "title": {
+        "ja": "てすとかふぇ",
+        "en": ""
+      },
+      "description": {
+        "ja": "いいねかふぇふぇしょうさい",
+        "en": ""
+      },
+      "shortDescription": {
+        "ja": "ててすとかふぇふぇ",
+        "en": ""
+      },
+      "images": [],
+      "location": {
+        "lat": 35.6598,
+        "lng": 139.67071903586597,
+        "hideExactLocation": true,
+        "address": {
+          "ja": "東京都中野区新中野",
+          "en": ""
+        }
+      },
+      "primaryCategory": "bar",
+      "genre": [
+        "solo-friendly"
+      ],
+      "travelStyle": [],
+      "soloFriendly": true,
+      "businessHours": {
+        "ja": "15:00 - ",
+        "en": ""
+      },
+      "access": {
+        "ja": "新中野駅の近く",
+        "en": ""
+      },
+      "tips": {
+        "ja": "マスターはバンドマンです。年齢不詳だけど多分60くらいかな？",
+        "en": ""
+      },
+      "isHidden": false,
+      "reactions": {
+        "interested": 0,
+        "visited": 0
+      },
+      "createdBy": "ひとりあそび研究所",
+      "createdAt": "2025-01-15T09:00:00.000Z"
+    },
+    {
+      "id": "bar--848568",
+      "title": {
+        "ja": "なんでもカレー味のもつ焼き店",
+        "en": "All About Curry-Flavored Grilled Offal Shop"
+      },
+      "description": {
+        "ja": "とっても美味しい、インドと日本の居酒屋の融合した摩訶不思議な店。めっちゃ人気です。",
+        "en": "A truly delicious and fascinating restaurant that blends Indian and Japanese izakaya styles. It's incredibly popular!"
+      },
+      "shortDescription": {
+        "ja": "とっても美味しい、インドと日本の居酒屋の融合した摩訶不思議な店。",
+        "en": "A fascinating fusion of Indian and Japanese izakaya, offering incredibly delicious dishes—perfect for solo explorers seeking a unique culinary experience."
+      },
+      "images": [
+        "/uploads/1752924060502_IMG_2079.jpeg",
+        "/uploads/1752924060506_IMG_2078.jpeg",
+        "/uploads/1752924060506_IMG_2077.jpeg"
+      ],
+      "location": {
+        "lat": 35.69453486656376,
+        "lng": 139.6686295227429,
+        "hideExactLocation": false,
+        "address": {
+          "ja": "東京都中野区弥生町",
+          "en": "Yayoicho, Nakano-ku, Tokyo"
+        }
+      },
+      "primaryCategory": "bar",
+      "genre": [
+        "bar"
+      ],
+      "travelStyle": [
+        "solo-perfect"
+      ],
+      "soloFriendly": true,
+      "businessHours": {
+        "ja": "",
+        "en": ""
+      },
+      "access": {
+        "ja": "新中野駅から徒歩5分",
+        "en": "5 minutes walk from Shin-Nakano Station"
+      },
+      "tips": {
+        "ja": "常連さん多いけどみなフレンドリー",
+        "en": "Many regulars visit, but everyone is friendly."
+      },
+      "isHidden": false,
+      "reactions": {
+        "interested": 0,
+        "visited": 0
+      },
+      "createdBy": "ひとりあそび研究所",
+      "createdAt": "2025-01-15T09:00:00.000Z"
     }
   ],
-  "lastUpdated": "2025-01-19"
+  "lastUpdated": "2025-07-19"
 }

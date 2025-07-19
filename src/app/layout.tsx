@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { Header } from "@/components/ui/header";
+import { Footer } from "@/components/ui/footer";
 import { NextAuthProvider } from "@/providers/session-provider";
 
 const geistSans = Geist({
@@ -17,7 +18,11 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "MyTokyoGem - Solo Travel Spots in Tokyo",
-  description: "Discover hidden gems in Tokyo perfect for solo travelers. Local spots recommended by Solo Adventure Lab.",
+  description: "Discover hidden gems in Tokyo perfect for solo travelers. Local spots recommended by Hitoriasobi Lab.",
+  icons: {
+    icon: "/mytokyogem_logo.png",
+    apple: "/mytokyogem_logo.png",
+  },
 };
 
 export default function RootLayout({
@@ -26,16 +31,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="light" style={{colorScheme: 'light'}}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50`}
       >
         <NextAuthProvider>
           <LanguageProvider>
-            <Header />
-            <main className="min-h-screen">
-              {children}
-            </main>
+            <div className="flex flex-col min-h-screen">
+              <Header />
+              <main className="flex-grow">
+                {children}
+              </main>
+              <Footer />
+            </div>
           </LanguageProvider>
         </NextAuthProvider>
       </body>

@@ -13,5 +13,19 @@ export interface LocalizedContent {
 }
 
 export function getLocalizedContent(content: LocalizedContent, language: Language): string {
-  return content[language] || content[DEFAULT_LANGUAGE];
+  const targetContent = content[language];
+  const fallbackContent = content[language === 'en' ? 'ja' : 'en'];
+  
+  // 対象言語のコンテンツが存在し、空でない場合はそれを返す
+  if (targetContent && targetContent.trim() !== '') {
+    return targetContent;
+  }
+  
+  // フォールバック言語のコンテンツが存在し、空でない場合はそれを返す
+  if (fallbackContent && fallbackContent.trim() !== '') {
+    return fallbackContent;
+  }
+  
+  // どちらも空の場合は空文字列を返す
+  return '';
 }
