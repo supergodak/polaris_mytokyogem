@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { getAllSpotsForAdmin } from '@/lib/data';
+import { getAllSpotsForAdmin } from '@/lib/supabase-data';
 import { Spot } from '@/types/spot';
 
 export default function AdminDashboard() {
