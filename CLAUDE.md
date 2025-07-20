@@ -11,7 +11,8 @@
 - **スタイリング**: Tailwind CSS
 - **認証**: NextAuth.js (credentials provider)
 - **デプロイ**: Netlify
-- **データベース**: Supabase (PostgreSQL)
+- **データベース**: Supabase (PostgreSQL) ← 2025年1月に完全移行完了
+- **ストレージ**: Supabase Storage（画像管理）
 - **データ管理**: Supabaseによる一元管理（ローカル・本番共通）
 - **お問い合わせ**: Slack Webhook連携
 
@@ -31,13 +32,14 @@
 
 ### 3. データ構造・データベース
 - ✅ Spot型定義（一人旅特化の属性設計）
-- ✅ Supabase PostgreSQLデータベース設計
-- ✅ 既存JSONデータの完全移行（5スポット）
+- ✅ Supabase PostgreSQLデータベース設計・完全移行完了
+- ✅ Supabase Storage（画像ストレージ）設定完了
 - ✅ データ取得用のヘルパー関数（Supabase対応）
 - ✅ hideExactLocation機能（隠れ家スポット対応）
 - ✅ createdAt自動記録（作成日時）
 - ✅ isHidden機能（下書き保存・非表示設定）
-- ✅ JSONファイル（フォールバック用として保持）
+- ✅ リアクション機能（Supabase対応）
+- ✅ 全APIエンドポイントのSupabase対応完了
 
 ### 4. UIコンポーネント
 - ✅ Card, Button, Badge コンポーネント
@@ -77,15 +79,16 @@
 - ✅ 日英両言語入力対応
 - ✅ リアルタイム翻訳機能（OpenAI API連携）
 - ✅ バリデーション・エラーハンドリング
-- ✅ 保存機能実装（API連携完了）
+- ✅ Supabase Storage画像アップロード機能
 - ✅ 非表示設定（下書き保存機能）
+- ✅ 完全Supabase対応（作成・編集・削除）
 
 ### 9. 「気になる」機能
 - ✅ ローカルストレージベースのお気に入り管理
 - ✅ ログイン不要でスポット保存
 - ✅ ハートボタンUI（🤍→❤️）
-- ✅ リアクション数のAPI管理
-- ✅ 気になるスポット一覧ページ（/favorites）
+- ✅ リアクション数のSupabase API管理
+- ✅ 気になるスポット一覧ページ（/favorites）- Supabase対応
 - ✅ ヘッダーに気になる数表示
 - ✅ 「行ってきた」機能は一時非表示
 
@@ -129,33 +132,44 @@ OPENAI_MODEL=gpt-4.1-nano
 # Slack Webhook設定
 SLACK_WEBHOOK_URL=https://hooks.slack.com/services/***
 
-# Supabase設定（現在は未使用）
-# NEXT_PUBLIC_SUPABASE_URL=https://atmzwpnfegalqdtqfwpo.supabase.co
-# NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+# Supabase設定（2025年1月に本格運用開始）
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 ```
 
 ## データ管理方式
 
-### 現在の構成（JSONファイルベース）
-- **データストア**: `data/spots.json`（ローカルファイル）
-- **運用方法**: ローカル環境で編集 → Git経由で本番反映
-- **制限事項**: Netlifyの本番環境では読み取り専用
+### 現在の構成（Supabaseベース - 2025年1月完全移行完了）
+- **データストア**: Supabase PostgreSQL（本番・ローカル共通）
+- **画像ストレージ**: Supabase Storage（spot-imagesバケット）
+- **運用方法**: 管理画面から直接データベース操作
+- **利点**: 本番環境でのリアルタイム編集が可能
 
-### 推奨運用フロー
-1. ローカル環境（localhost:3000）で管理画面にログイン
-2. スポットの登録・編集・削除を実行
-3. 変更をGitにコミット・プッシュ
-4. Netlifyが自動的に本番環境にデプロイ
+### 運用フロー
+1. 管理画面（localhost:3000/admin または 本番URL/admin）にログイン
+2. スポットの登録・編集・削除をリアルタイム実行
+3. 変更は即座にデータベースに反映
+4. 本番・ローカル環境で同一のデータを共有
 
-### Supabase移行の試み（2025年1月）
-- **背景**: 本番環境での直接編集を可能にするため
-- **実装**: PostgreSQL + Supabase Storage対応
-- **結果**: 技術的には成功したが、運用の複雑さから撤回
-- **判断**: PoCフェーズではJSONファイルで十分と判断
+### Supabase移行の経緯（2025年1月）
+- **第1回目（2025年1月初旬）**: 技術検証後、運用複雑さから一旦撤回
+- **第2回目（2025年1月20日）**: GitHub API方式を経て、完全移行を再実装
+- **背景**: 本番環境での直接編集ニーズの高まり
+- **実装内容**: 
+  - PostgreSQL + Supabase Storage完全対応
+  - 全APIエンドポイントのSupabase移行
+  - 画像アップロード・表示機能
+  - Row Level Security設定
+- **結果**: 技術的・運用的に成功、本格運用開始
 
-### 将来の拡張性
-- データ量が増えた場合はSupabaseへの移行を再検討
-- 現在のコードはSupabase対応の基盤を残している
+### 技術詳細
+- **データベース**: spotsテーブル（RLS無効化、anon権限付与）
+- **ストレージ**: spot-imagesバケット（Public設定、画像アップロード権限）
+- **API構成**: 
+  - `/api/spots/supabase` - 一般向けスポット取得
+  - `/api/admin/spots/supabase` - 管理者向けCRUD操作
+  - `/api/spots/[id]` - 個別スポット操作（Supabase対応）
+  - `/api/spots/[id]/reactions` - リアクション機能（Supabase対応）
 
 ## データ構造の変遷
 ### 削除済みフィールド
@@ -242,9 +256,31 @@ data/
 3. 「Add New Webhook to Workspace」でチャンネル選択
 4. 生成されたWebhook URLを `SLACK_WEBHOOK_URL` に設定
 
+## 現在の課題・調査中
+
+### Supabase Storage画像表示問題（2025年1月20日）
+- **現象**: 画像がSupabase Storageに正常アップロードされるが、ブラウザで400エラー
+- **調査状況**: 
+  - Storage権限設定済み（Public read, authenticated upload）
+  - RLS ポリシー追加済み（Public upload/update 許可）
+  - 画像URL生成ロジック改善実装済み
+  - ダブルスラッシュ問題修正済み
+- **次の調査**: 
+  - 生成される画像URLの詳細確認
+  - Supabase Storage設定の再確認
+  - Content-Type、CORS設定の確認
+
+### 完了した修正（2025年1月20日）
+- ✅ GitHub API方式から完全撤回
+- ✅ 全JSONファイル参照をSupabase対応に移行
+- ✅ 個別スポットAPI (/api/spots/[id]) の404エラー修正
+- ✅ スポット編集フォームのGitHub API呼び出し削除
+- ✅ 管理画面、お気に入りページのSupabase API対応
+- ✅ リアクション機能のSupabase対応
+
 ## トラブルシューティング
-- **画像が壊れて表示される**: `data/spots.json`のimagesを空配列にすることでプレースホルダー表示
 - **認証エラー**: `.env.local`の環境変数設定を確認
 - **ビルドエラー**: TypeScript型エラーの可能性、`npm run lint`で確認
 - **Next.js 15 params エラー**: `use(params)`フックで解決済み
 - **Slack通知が届かない**: Webhook URLとチャンネル権限を確認
+- **Supabase接続エラー**: 環境変数NEXT_PUBLIC_SUPABASE_URL/ANON_KEYを確認
