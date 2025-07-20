@@ -7,29 +7,69 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ImageGallery } from '@/components/ui/image-gallery';
-import { getSpotById } from '@/lib/data';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getLocalizedContent } from '@/lib/i18n';
 import { generateGoogleMapsUrl, generateGoogleMapsDirectionsUrl } from '@/lib/maps';
 import { getLocalizedTag } from '@/lib/tags';
 import { useFavorites } from '@/hooks/useFavorites';
 import { trackSpotView, trackOutboundLink } from '@/lib/analytics';
+import { Spot } from '@/types/spot';
 
 export default function SpotDetailPage() {
   const params = useParams();
   const { language } = useLanguage();
   const { toggleFavorite, isFavorite } = useFavorites();
-  const spot = getSpotById(params.id as string);
+  const [spot, setSpot] = useState<Spot | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [currentReactions, setCurrentReactions] = useState(spot?.reactions || { interested: 0, visited: 0 });
+  const [currentReactions, setCurrentReactions] = useState({ interested: 0, visited: 0 });
 
-  // スポット閲覧をトラッキング（条件付きでない位置に移動）
+  // スポットデータを取得
+  useEffect(() => {
+    const fetchSpot = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch(`/api/spots/${params.id}`);
+        if (response.ok) {
+          const data = await response.json();
+          setSpot(data);
+          setCurrentReactions(data.reactions || { interested: 0, visited: 0 });
+        } else {
+          console.error('Failed to fetch spot:', response.status);
+          setSpot(null);
+        }
+      } catch (error) {
+        console.error('Error fetching spot:', error);
+        setSpot(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (params.id) {
+      fetchSpot();
+    }
+  }, [params.id]);
+
+  // スポット閲覧をトラッキング
   useEffect(() => {
     if (spot) {
       const title = getLocalizedContent(spot.title, language);
       trackSpotView(spot.id, title);
     }
   }, [spot, language]);
+
+  if (isLoading) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="text-center">
+          <p className="text-gray-500">
+            {language === 'ja' ? '読み込み中...' : 'Loading...'}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (!spot) {
     return (
