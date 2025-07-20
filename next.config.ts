@@ -15,6 +15,10 @@ const nextConfig: NextConfig = {
         pathname: '/storage/v1/object/public/**',
       },
     ],
+    // EXIF情報による自動回転を無効化（iOS表示問題対応）
+    unoptimized: false,
+    dangerouslyAllowSVG: false,
+    contentDispositionType: 'inline',
   },
 };
 
