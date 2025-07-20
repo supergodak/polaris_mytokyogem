@@ -1,47 +1,80 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
-import fs from 'fs/promises';
-import path from 'path';
-import { Spot } from '@/types/spot';
+import { getSpotById, updateSpot, deleteSpot } from '@/lib/supabase-data';
 
-const SPOTS_FILE_PATH = path.join(process.cwd(), 'data/spots.json');
+// NextAuth設定
+const authOptions = {
+  providers: [],
+  session: { strategy: 'jwt' as const },
+  callbacks: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async jwt({ token, user }: { token: any; user: any }) {
+      if (user) {
+        token.role = 'admin';
+      }
+      return token;
+    },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async session({ session, token }: { session: any; token: any }) {
+      if (session.user) {
+        session.user.role = token.role;
+      }
+      return session;
+    }
+  }
+};
 
-// 個別スポット取得API
+// 個別スポット取得API（Supabase対応）
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  console.log('🔧 [Spot API] GET request for spot ID:', id);
+  
   try {
-    const spotsData = await fs.readFile(SPOTS_FILE_PATH, 'utf-8');
-    const spots = JSON.parse(spotsData);
+    const spot = await getSpotById(id);
     
-    const spot = spots.spots.find((s: Spot) => s.id === id);
-    
-    if (!spot || spot.isHidden) {
+    if (!spot) {
+      console.log('❌ [Spot API] Spot not found:', id);
       return NextResponse.json({ error: 'Spot not found' }, { status: 404 });
     }
+
+    // 非表示スポットは管理者のみ表示
+    if (spot.isHidden) {
+      const session = await getServerSession(authOptions);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if (!session?.user || (session.user as any).role !== 'admin') {
+        console.log('❌ [Spot API] Hidden spot access denied:', id);
+        return NextResponse.json({ error: 'Spot not found' }, { status: 404 });
+      }
+    }
     
+    console.log('✅ [Spot API] Spot found:', spot.title.ja);
     return NextResponse.json(spot);
   } catch (error) {
-    console.error('Error fetching spot:', error);
+    console.error('❌ [Spot API] Error fetching spot:', error);
     return NextResponse.json({ 
-      error: 'Failed to fetch spot' 
+      error: 'Failed to fetch spot',
+      details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
 }
 
-// スポット更新API
+// スポット更新API（Supabase対応）
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  console.log('🔧 [Spot API] PUT request for spot ID:', id);
+  
   try {
     // 認証・認可チェック
-    const session = await getServerSession();
-    // @ts-expect-error - NextAuth session types need update
-    if (!session?.user || session.user?.role !== 'admin') {
+    const session = await getServerSession(authOptions);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (!session?.user || (session.user as any).role !== 'admin') {
+      console.error('❌ [Spot API] Authorization failed - no admin role');
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
@@ -54,104 +87,56 @@ export async function PUT(
       }, { status: 400 });
     }
 
-    // 既存データを読み込み
-    const spotsData = await fs.readFile(SPOTS_FILE_PATH, 'utf-8');
-    const spots = JSON.parse(spotsData);
+    // Supabaseでスポットを更新
+    const updatedSpot = await updateSpot(id, formData);
     
-    // スポットを検索
-    const spotIndex = spots.spots.findIndex((s: Spot) => s.id === id);
+    console.log('✅ [Spot API] Spot updated successfully:', updatedSpot.title.ja);
     
-    if (spotIndex === -1) {
-      return NextResponse.json({ error: 'Spot not found' }, { status: 404 });
-    }
-
-    // 既存のスポットデータを保持しつつ更新
-    const existingSpot = spots.spots[spotIndex];
-    const updatedSpot: Spot = {
-      ...existingSpot,
-      title: formData.title,
-      description: formData.description,
-      shortDescription: formData.shortDescription,
-      images: formData.images || existingSpot.images,
-      location: {
-        lat: formData.location.lat,
-        lng: formData.location.lng,
-        hideExactLocation: formData.location.hideExactLocation || false,
-        address: formData.location.address
-      },
-      primaryCategory: formData.primaryCategory,
-      genre: formData.genre || [],
-      travelStyle: formData.travelStyle || [],
-      soloFriendly: formData.soloFriendly || false,
-      businessHours: formData.businessHours || { ja: '', en: '' },
-      access: formData.access || { ja: '', en: '' },
-      tips: formData.tips || { ja: '', en: '' },
-      isHidden: formData.isHidden !== undefined ? formData.isHidden : (existingSpot.isHidden || false),
-      reactions: existingSpot.reactions, // リアクションは保持
-      createdBy: existingSpot.createdBy, // 作成者も保持
-      createdAt: existingSpot.createdAt || new Date().toISOString() // 作成日時も保持
-    };
-
-    // スポットを更新
-    spots.spots[spotIndex] = updatedSpot;
-    spots.lastUpdated = new Date().toISOString().split('T')[0];
-
-    // ファイルに保存
-    await fs.writeFile(SPOTS_FILE_PATH, JSON.stringify(spots, null, 2), 'utf-8');
-
     return NextResponse.json({ 
       success: true, 
       spot: updatedSpot 
     });
 
   } catch (error) {
-    console.error('Error updating spot:', error);
+    console.error('❌ [Spot API] Error updating spot:', error);
     return NextResponse.json({ 
-      error: 'Internal server error' 
+      error: 'Failed to update spot',
+      details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
 }
 
-// スポット削除API（オプション）
+// スポット削除API（Supabase対応）
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  console.log('🔧 [Spot API] DELETE request for spot ID:', id);
+  
   try {
     // 認証・認可チェック
-    const session = await getServerSession();
-    // @ts-expect-error - NextAuth session types need update
-    if (!session?.user || session.user?.role !== 'admin') {
+    const session = await getServerSession(authOptions);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (!session?.user || (session.user as any).role !== 'admin') {
+      console.error('❌ [Spot API] Authorization failed - no admin role');
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    // 既存データを読み込み
-    const spotsData = await fs.readFile(SPOTS_FILE_PATH, 'utf-8');
-    const spots = JSON.parse(spotsData);
+    // Supabaseからスポットを削除
+    await deleteSpot(id);
     
-    // スポットを検索
-    const spotIndex = spots.spots.findIndex((s: Spot) => s.id === id);
+    console.log('✅ [Spot API] Spot deleted successfully:', id);
     
-    if (spotIndex === -1) {
-      return NextResponse.json({ error: 'Spot not found' }, { status: 404 });
-    }
-
-    // スポットを削除
-    spots.spots.splice(spotIndex, 1);
-    spots.lastUpdated = new Date().toISOString().split('T')[0];
-
-    // ファイルに保存
-    await fs.writeFile(SPOTS_FILE_PATH, JSON.stringify(spots, null, 2), 'utf-8');
-
     return NextResponse.json({ 
       success: true 
     });
 
   } catch (error) {
-    console.error('Error deleting spot:', error);
+    console.error('❌ [Spot API] Error deleting spot:', error);
     return NextResponse.json({ 
-      error: 'Internal server error' 
+      error: 'Failed to delete spot',
+      details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
 }
