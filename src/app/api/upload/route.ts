@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
         // ファイルをSupabase Storageにアップロード
         console.log(`📤 [UPLOAD] Uploading ${file.name} (${file.size} bytes, ${file.type})...`);
         const buffer = await file.arrayBuffer();
-        const { data, error } = await supabase.storage
+        const { error } = await supabase.storage
           .from(bucketName)
           .upload(fileName, buffer, {
             contentType: file.type,
@@ -65,10 +65,10 @@ export async function POST(request: NextRequest) {
         if (error) {
           console.error(`❌ [UPLOAD] Supabase error for ${file.name}:`, {
             message: error.message,
-            status: (error as any).status || 'unknown',
-            statusCode: (error as any).statusCode || 'unknown',
-            details: (error as any).details || 'none',
-            hint: (error as any).hint || 'none'
+            status: 'status' in error ? (error as {status: string}).status : 'unknown',
+            statusCode: 'statusCode' in error ? (error as {statusCode: string}).statusCode : 'unknown',
+            details: 'details' in error ? (error as {details: string}).details : 'none',
+            hint: 'hint' in error ? (error as {hint: string}).hint : 'none'
           });
           return NextResponse.json({ 
             error: `Failed to upload file ${file.name}: ${error.message}`,
