@@ -3,18 +3,49 @@ import { getServerSession } from 'next-auth/next';
 import { getFileContent, createCommitWithFiles } from '@/lib/github';
 import { Spot } from '@/types/spot';
 
+// NextAuth設定をインポート
+const authOptions = {
+  providers: [],
+  session: { strategy: 'jwt' as const },
+  callbacks: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async jwt({ token, user }: { token: any; user: any }) {
+      if (user) {
+        token.role = 'admin';
+      }
+      return token;
+    },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async session({ session, token }: { session: any; token: any }) {
+      if (session.user) {
+        session.user.role = token.role;
+      }
+      return session;
+    }
+  }
+};
+
 // GitHub経由でスポットを作成
 export async function POST(request: NextRequest) {
   console.log('🔧 [GitHub API] POST request received');
   
   try {
     // 認証・認可チェック
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions);
     console.log('👤 [GitHub API] Session:', session?.user?.email || 'No user');
+    console.log('🔐 [GitHub API] Full session:', JSON.stringify(session, null, 2));
+    console.log('👮 [GitHub API] User object:', JSON.stringify(session?.user, null, 2));
     
-    // @ts-expect-error - NextAuth session types need update
-    if (!session?.user || session.user?.role !== 'admin') {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (!session?.user || (session.user as any).role !== 'admin') {
       console.error('❌ [GitHub API] Authorization failed - no admin role');
+      console.error('📋 Session details:', {
+        hasUser: !!session?.user,
+        userEmail: session?.user?.email,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        userRole: (session?.user as any)?.role,
+        sessionKeys: session ? Object.keys(session) : []
+      });
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
@@ -142,12 +173,21 @@ export async function PUT(request: NextRequest) {
   
   try {
     // 認証・認可チェック
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions);
     console.log('👤 [GitHub API] Session:', session?.user?.email || 'No user');
+    console.log('🔐 [GitHub API] Full session:', JSON.stringify(session, null, 2));
+    console.log('👮 [GitHub API] User object:', JSON.stringify(session?.user, null, 2));
     
-    // @ts-expect-error - NextAuth session types need update
-    if (!session?.user || session.user?.role !== 'admin') {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (!session?.user || (session.user as any).role !== 'admin') {
       console.error('❌ [GitHub API] Authorization failed - no admin role');
+      console.error('📋 Session details:', {
+        hasUser: !!session?.user,
+        userEmail: session?.user?.email,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        userRole: (session?.user as any)?.role,
+        sessionKeys: session ? Object.keys(session) : []
+      });
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
