@@ -1,9 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs/promises';
-import path from 'path';
-import { Spot } from '@/types/spot';
-
-const SPOTS_FILE_PATH = path.join(process.cwd(), 'data/spots.json');
+import { getSpotById, updateSpotReactions } from '@/lib/supabase-data';
 
 // リアクション更新API
 export async function POST(
@@ -34,31 +30,35 @@ export async function POST(
       }, { status: 400 });
     }
 
-    // 既存データを読み込み
-    const spotsData = await fs.readFile(SPOTS_FILE_PATH, 'utf-8');
-    const spots = JSON.parse(spotsData);
+    // 現在のスポットを取得
+    const currentSpot = await getSpotById(id);
     
-    // スポットを検索
-    const spotIndex = spots.spots.findIndex((s: Spot) => s.id === id);
-    
-    if (spotIndex === -1) {
+    if (!currentSpot) {
       return NextResponse.json({ error: 'Spot not found' }, { status: 404 });
     }
 
     // リアクション数を更新
-    const spot = spots.spots[spotIndex];
+    const currentReactions = currentSpot.reactions || { interested: 0, visited: 0 };
+    const newReactions = { ...currentReactions };
+    
     if (action === 'add') {
-      spot.reactions[type] = (spot.reactions[type] || 0) + 1;
-    } else if (action === 'remove' && spot.reactions[type] > 0) {
-      spot.reactions[type] = spot.reactions[type] - 1;
+      newReactions[type as keyof typeof newReactions] = (newReactions[type as keyof typeof newReactions] || 0) + 1;
+    } else if (action === 'remove' && newReactions[type as keyof typeof newReactions] > 0) {
+      newReactions[type as keyof typeof newReactions] = newReactions[type as keyof typeof newReactions] - 1;
     }
 
-    // ファイルに保存
-    await fs.writeFile(SPOTS_FILE_PATH, JSON.stringify(spots, null, 2), 'utf-8');
+    // Supabaseでリアクションを更新
+    const success = await updateSpotReactions(id, newReactions);
+    
+    if (!success) {
+      return NextResponse.json({ 
+        error: 'Failed to update reactions' 
+      }, { status: 500 });
+    }
 
     return NextResponse.json({ 
       success: true,
-      reactions: spot.reactions
+      reactions: newReactions
     });
 
   } catch (error) {

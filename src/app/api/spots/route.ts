@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
-import fs from 'fs/promises';
-import path from 'path';
-import { Spot } from '@/types/spot';
-
-const SPOTS_FILE_PATH = path.join(process.cwd(), 'data/spots.json');
+import { getAllSpots, createSpot } from '@/lib/supabase-data';
 
 // スポット作成API
 export async function POST(request: NextRequest) {
@@ -24,20 +20,12 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // 既存データを読み込み
-    const spotsData = await fs.readFile(SPOTS_FILE_PATH, 'utf-8');
-    const spots = JSON.parse(spotsData);
-
-    // 新しいIDを生成
-    const id = generateSpotId(formData.title.ja, formData.primaryCategory);
-
     // 新しいスポットデータを作成
-    const newSpot: Spot = {
-      id,
+    const spotData = {
       title: formData.title,
       description: formData.description,
       shortDescription: formData.shortDescription,
-      images: formData.images || [], // フロントエンドから送信された画像URLを使用
+      images: formData.images || [],
       location: {
         lat: formData.location.lat,
         lng: formData.location.lng,
@@ -56,23 +44,16 @@ export async function POST(request: NextRequest) {
         interested: 0,
         visited: 0
       },
-      createdBy: 'ひとりあそび研究所',
-      createdAt: new Date().toISOString()
+      createdBy: 'ひとりあそび研究所'
     };
 
-    // スポットリストに追加
-    spots.spots.push(newSpot);
-    spots.lastUpdated = new Date().toISOString().split('T')[0];
+    // Supabaseにデータを保存
+    const newSpot = await createSpot(spotData);
 
-    // ファイルに保存（本番環境での書き込み制限をチェック）
-    try {
-      await fs.writeFile(SPOTS_FILE_PATH, JSON.stringify(spots, null, 2), 'utf-8');
-    } catch (writeError) {
-      console.error('File write error:', writeError);
+    if (!newSpot) {
       return NextResponse.json({ 
-        error: 'Database write permission denied. This feature is read-only in production.',
-        details: process.env.NODE_ENV === 'development' ? String(writeError) : undefined
-      }, { status: 503 });
+        error: 'Failed to create spot in database' 
+      }, { status: 500 });
     }
 
     return NextResponse.json({ 
@@ -93,16 +74,16 @@ export async function POST(request: NextRequest) {
 // スポット一覧取得API
 export async function GET() {
   try {
-    const spotsData = await fs.readFile(SPOTS_FILE_PATH, 'utf-8');
-    const spots = JSON.parse(spotsData);
+    // Supabaseから公開スポットを取得
+    const spots = await getAllSpots();
     
-    // 非表示スポットを除外
-    const visibleSpots = {
-      ...spots,
-      spots: spots.spots.filter((spot: Spot) => !spot.isHidden)
+    // 既存のJSONレスポンス形式と互換性を保つ
+    const response = {
+      spots: spots,
+      lastUpdated: new Date().toISOString().split('T')[0]
     };
     
-    return NextResponse.json(visibleSpots);
+    return NextResponse.json(response);
   } catch (error) {
     console.error('Error fetching spots:', error);
     return NextResponse.json({ 
@@ -111,20 +92,3 @@ export async function GET() {
   }
 }
 
-// ID生成ヘルパー関数
-function generateSpotId(title: string, category: string): string {
-  // タイトルから安全な文字列を生成
-  const safeTitle = title
-    .toLowerCase()
-    .replace(/[^\w\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .slice(0, 20);
-  
-  // カテゴリーの略称
-  const categoryPrefix = category.slice(0, 4);
-  
-  // タイムスタンプ
-  const timestamp = Date.now().toString().slice(-6);
-  
-  return `${categoryPrefix}-${safeTitle}-${timestamp}`;
-}

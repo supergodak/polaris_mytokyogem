@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
-import fs from 'fs/promises';
-import path from 'path';
 import { Spot } from '@/types/spot';
-
-const SPOTS_FILE_PATH = path.join(process.cwd(), 'data/spots.json');
+import { getSpotById, updateSpot, deleteSpot } from '@/lib/supabase-data';
 
 // 個別スポット取得API
 export async function GET(
@@ -13,10 +10,7 @@ export async function GET(
 ) {
   const { id } = await params;
   try {
-    const spotsData = await fs.readFile(SPOTS_FILE_PATH, 'utf-8');
-    const spots = JSON.parse(spotsData);
-    
-    const spot = spots.spots.find((s: Spot) => s.id === id);
+    const spot = await getSpotById(id);
     
     if (!spot || spot.isHidden) {
       return NextResponse.json({ error: 'Spot not found' }, { status: 404 });
@@ -53,25 +47,12 @@ export async function PUT(
       }, { status: 400 });
     }
 
-    // 既存データを読み込み
-    const spotsData = await fs.readFile(SPOTS_FILE_PATH, 'utf-8');
-    const spots = JSON.parse(spotsData);
-    
-    // スポットを検索
-    const spotIndex = spots.spots.findIndex((s: Spot) => s.id === id);
-    
-    if (spotIndex === -1) {
-      return NextResponse.json({ error: 'Spot not found' }, { status: 404 });
-    }
-
-    // 既存のスポットデータを保持しつつ更新
-    const existingSpot = spots.spots[spotIndex];
-    const updatedSpot: Spot = {
-      ...existingSpot,
+    // 更新データを作成
+    const updateData: Partial<Spot> = {
       title: formData.title,
       description: formData.description,
       shortDescription: formData.shortDescription,
-      images: formData.images || existingSpot.images,
+      images: formData.images,
       location: {
         lat: formData.location.lat,
         lng: formData.location.lng,
@@ -85,25 +66,16 @@ export async function PUT(
       businessHours: formData.businessHours || { ja: '', en: '' },
       access: formData.access || { ja: '', en: '' },
       tips: formData.tips || { ja: '', en: '' },
-      isHidden: formData.isHidden !== undefined ? formData.isHidden : (existingSpot.isHidden || false),
-      reactions: existingSpot.reactions, // リアクションは保持
-      createdBy: existingSpot.createdBy, // 作成者も保持
-      createdAt: existingSpot.createdAt || new Date().toISOString() // 作成日時も保持
+      isHidden: formData.isHidden
     };
 
-    // スポットを更新
-    spots.spots[spotIndex] = updatedSpot;
-    spots.lastUpdated = new Date().toISOString().split('T')[0];
+    // Supabaseでスポットを更新
+    const updatedSpot = await updateSpot(id, updateData);
 
-    // ファイルに保存（本番環境での書き込み制限をチェック）
-    try {
-      await fs.writeFile(SPOTS_FILE_PATH, JSON.stringify(spots, null, 2), 'utf-8');
-    } catch (writeError) {
-      console.error('File write error:', writeError);
+    if (!updatedSpot) {
       return NextResponse.json({ 
-        error: 'Database write permission denied. This feature is read-only in production.',
-        details: process.env.NODE_ENV === 'development' ? String(writeError) : undefined
-      }, { status: 503 });
+        error: 'Failed to update spot' 
+      }, { status: 500 });
     }
 
     return NextResponse.json({ 
@@ -122,7 +94,7 @@ export async function PUT(
   }
 }
 
-// スポット削除API（オプション）
+// スポット削除API
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -135,30 +107,13 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // 既存データを読み込み
-    const spotsData = await fs.readFile(SPOTS_FILE_PATH, 'utf-8');
-    const spots = JSON.parse(spotsData);
-    
-    // スポットを検索
-    const spotIndex = spots.spots.findIndex((s: Spot) => s.id === id);
-    
-    if (spotIndex === -1) {
-      return NextResponse.json({ error: 'Spot not found' }, { status: 404 });
-    }
+    // Supabaseでスポットを削除
+    const success = await deleteSpot(id);
 
-    // スポットを削除
-    spots.spots.splice(spotIndex, 1);
-    spots.lastUpdated = new Date().toISOString().split('T')[0];
-
-    // ファイルに保存（本番環境での書き込み制限をチェック）
-    try {
-      await fs.writeFile(SPOTS_FILE_PATH, JSON.stringify(spots, null, 2), 'utf-8');
-    } catch (writeError) {
-      console.error('File write error:', writeError);
+    if (!success) {
       return NextResponse.json({ 
-        error: 'Database write permission denied. This feature is read-only in production.',
-        details: process.env.NODE_ENV === 'development' ? String(writeError) : undefined
-      }, { status: 503 });
+        error: 'Failed to delete spot' 
+      }, { status: 500 });
     }
 
     return NextResponse.json({ 

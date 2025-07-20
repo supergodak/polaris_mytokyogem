@@ -10,8 +10,9 @@
 - **フレームワーク**: Next.js 15 (App Router) + TypeScript
 - **スタイリング**: Tailwind CSS
 - **認証**: NextAuth.js (credentials provider)
-- **デプロイ**: Netlify（予定）
-- **データ管理**: JSONファイル + GitHub（PoCフェーズ）
+- **デプロイ**: Netlify
+- **データベース**: Supabase (PostgreSQL)
+- **データ管理**: Supabaseによる一元管理（ローカル・本番共通）
 - **お問い合わせ**: Slack Webhook連携
 
 ## 実装済み機能
@@ -28,13 +29,15 @@
 - ✅ LanguageSwitcherコンポーネント
 - ✅ 統一表記：マイ・トーキョー・ジェム / MyTokyoGem
 
-### 3. データ構造
+### 3. データ構造・データベース
 - ✅ Spot型定義（一人旅特化の属性設計）
-- ✅ JSONベースのサンプルデータ作成
-- ✅ データ取得用のヘルパー関数
+- ✅ Supabase PostgreSQLデータベース設計
+- ✅ 既存JSONデータの完全移行（5スポット）
+- ✅ データ取得用のヘルパー関数（Supabase対応）
 - ✅ hideExactLocation機能（隠れ家スポット対応）
 - ✅ createdAt自動記録（作成日時）
 - ✅ isHidden機能（下書き保存・非表示設定）
+- ✅ JSONファイル（フォールバック用として保持）
 
 ### 4. UIコンポーネント
 - ✅ Card, Button, Badge コンポーネント
@@ -125,7 +128,41 @@ OPENAI_MODEL=gpt-4.1-nano
 
 # Slack Webhook設定
 SLACK_WEBHOOK_URL=https://hooks.slack.com/services/***
+
+# Supabase設定（ローカル・本番共通）
+NEXT_PUBLIC_SUPABASE_URL=https://atmzwpnfegalqdtqfwpo.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
+
+## Supabase構成
+
+### データベース設計
+- **プロジェクトURL**: https://atmzwpnfegalqdtqfwpo.supabase.co
+- **テーブル**: `spots` (PostgreSQL)
+- **スキーマ**: 既存Spot型と完全互換性
+- **ID形式**: TEXT型（既存IDとの互換性を保持）
+
+### データ統合アーキテクチャ
+```
+ローカル開発環境 ──┐
+                  ├──→ Supabase PostgreSQL
+本番環境 ─────────┘    (同一データベース)
+
+フォールバック: data/spots.json
+```
+
+### 環境構成の特徴
+- **一元管理**: ローカル・本番で同じデータベースを共有
+- **リアルタイム同期**: ローカルでの変更が即座に本番に反映
+- **シンプルな運用**: 環境別設定が不要
+- **本番編集対応**: Netlifyの読み取り専用制限を完全解決
+
+### 移行完了事項
+- ✅ 5つのスポットをJSONからSupabaseに移行済み
+- ✅ 全API（CRUD）のSupabase対応完了
+- ✅ 型安全性確保（TypeScript + ESLint）
+- ✅ ビルド成功確認
+- ✅ フォールバック機能実装済み
 
 ## データ構造の変遷
 ### 削除済みフィールド
@@ -194,7 +231,9 @@ src/
 │   └── useFavorites.ts（ローカルストレージ管理）
 ├── lib/               # ユーティリティ
 │   ├── i18n.ts       # 多言語対応
-│   ├── data.ts       # データ取得（非表示フィルタ）
+│   ├── data.ts       # データ取得（Supabase + フォールバック）
+│   ├── supabase.ts   # Supabaseクライアント設定
+│   ├── supabase-data.ts # Supabaseデータアクセス層
 │   ├── maps.ts       # Google Maps連携
 │   └── tags.ts       # タグシステム（300+タグ定義）
 ├── providers/         # プロバイダー
@@ -203,7 +242,15 @@ src/
     └── spot.ts（createdAt/isHidden追加）
 
 data/
-└── spots.json         # スポットデータ（5つのサンプル）
+└── spots.json         # フォールバック用データ（元：5つのサンプル）
+
+scripts/
+├── migrate-to-supabase.js      # データ移行スクリプト（実行済み）
+└── setup-supabase-schema.js    # スキーマ作成スクリプト
+
+ルート/
+├── supabase_schema.sql         # 初期スキーマ（UUID版）
+└── supabase_schema_v2.sql      # 最終スキーマ（TEXT ID版）
 ```
 
 ## Slack Webhook設定方法
