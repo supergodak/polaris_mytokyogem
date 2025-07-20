@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
-import fs from 'fs/promises';
-import path from 'path';
-
-const UPLOAD_DIR = path.join(process.cwd(), 'public/uploads');
+import { supabase } from '@/lib/supabase';
 
 // 画像アップロードAPI
 export async function POST(request: NextRequest) {
@@ -23,13 +20,8 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // アップロードディレクトリを作成（存在しない場合）
-    try {
-      await fs.mkdir(UPLOAD_DIR, { recursive: true });
-    } catch (mkdirError) {
-      // ディレクトリが既に存在する場合はエラーを無視
-      console.log('Directory creation error (likely already exists):', mkdirError);
-    }
+    // Supabase Storageのバケット名
+    const bucketName = 'spot-images';
 
     const uploadedFiles: string[] = [];
 
@@ -38,7 +30,6 @@ export async function POST(request: NextRequest) {
       const timestamp = Date.now();
       const originalName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
       const fileName = `${timestamp}_${originalName}`;
-      const filePath = path.join(UPLOAD_DIR, fileName);
 
       // ファイルサイズチェック（10MB制限）
       if (file.size > 10 * 1024 * 1024) {
@@ -55,12 +46,28 @@ export async function POST(request: NextRequest) {
       }
 
       try {
-        // ファイルを保存
+        // ファイルをSupabase Storageにアップロード
         const buffer = await file.arrayBuffer();
-        await fs.writeFile(filePath, Buffer.from(buffer));
-        
+        const { data, error } = await supabase.storage
+          .from(bucketName)
+          .upload(fileName, buffer, {
+            contentType: file.type,
+            cacheControl: '3600',
+            upsert: false
+          });
+
+        if (error) {
+          console.error(`Error uploading file ${file.name}:`, error);
+          return NextResponse.json({ 
+            error: `Failed to upload file ${file.name}: ${error.message}` 
+          }, { status: 500 });
+        }
+
         // 公開URLを生成
-        const publicUrl = `/uploads/${fileName}`;
+        const { data: { publicUrl } } = supabase.storage
+          .from(bucketName)
+          .getPublicUrl(fileName);
+        
         uploadedFiles.push(publicUrl);
       } catch (saveError) {
         console.error(`Error saving file ${file.name}:`, saveError);
