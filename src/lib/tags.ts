@@ -336,13 +336,25 @@ export function getLocalizedTag(tagKey: string, language: 'ja' | 'en'): string {
 
 // タグ検索用ヘルパー関数
 export function searchTags(query: string, language: 'ja' | 'en' = 'ja'): Array<{key: string, tag: Tag}> {
-  const lowercaseQuery = query.toLowerCase();
+  const normalizedQuery = query.toLowerCase();
   
   return Object.entries(ALL_TAGS)
     .filter(([key, tag]) => {
-      const searchText = language === 'ja' ? tag.ja : tag.en;
-      return searchText.toLowerCase().includes(lowercaseQuery) || 
-             key.toLowerCase().includes(lowercaseQuery);
+      // 言語に応じて検索対象のテキストを取得
+      const jaText = tag.ja;
+      const enText = tag.en;
+      
+      // 日本語の場合は大文字小文字変換なしで検索
+      if (language === 'ja') {
+        return jaText.includes(query) || 
+               enText.toLowerCase().includes(normalizedQuery) ||
+               key.toLowerCase().includes(normalizedQuery);
+      } else {
+        // 英語の場合は従来通り
+        return enText.toLowerCase().includes(normalizedQuery) || 
+               jaText.includes(query) ||
+               key.toLowerCase().includes(normalizedQuery);
+      }
     })
     .map(([key, tag]) => ({ key, tag }))
     .slice(0, 20); // 最大20件まで

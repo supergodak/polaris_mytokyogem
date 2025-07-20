@@ -9,10 +9,11 @@ const SPOTS_FILE_PATH = path.join(process.cwd(), 'data/spots.json');
 // スポット作成API
 export async function POST(request: NextRequest) {
   try {
-    // 認証チェック
+    // 認証・認可チェック
     const session = await getServerSession();
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // @ts-expect-error - NextAuth session types need update
+    if (!session?.user || session.user?.role !== 'admin') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     const formData = await request.json();

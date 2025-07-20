@@ -196,37 +196,77 @@ export default function NewSpotPage() {
     setIsLoading(true);
 
     try {
-      let imageUrls: string[] = [];
-
-      // 1. 画像のアップロード
-      if (formData.images.length > 0) {
-        const imageFormData = new FormData();
-        formData.images.forEach((file) => {
-          imageFormData.append('images', file);
+      // 本番環境かどうかを判定
+      const isProduction = window.location.hostname !== 'localhost';
+      
+      if (isProduction) {
+        // 本番環境: GitHub API経由で保存
+        const imageDataPromises = formData.images.map(async (file) => {
+          return new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              const base64 = reader.result as string;
+              resolve(base64.split(',')[1]); // data:image/...を除去
+            };
+            reader.readAsDataURL(file);
+          });
         });
-
-        const uploadResponse = await fetch('/api/upload', {
+        
+        const imageData = await Promise.all(imageDataPromises);
+        
+        const response = await fetch('/api/admin/spots/github', {
           method: 'POST',
-          body: imageFormData,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            spot: formData,
+            images: imageData,
+          }),
         });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || errorData.details || 'スポットの作成に失敗しました');
+        }
+        
+        const data = await response.json();
+        alert(data.message || 'スポットを作成しました！2-3分後に反映されます。');
+        router.push('/admin');
+        
+      } else {
+        // ローカル環境: 従来通りの処理
+        let imageUrls: string[] = [];
 
-        if (!uploadResponse.ok) {
-          const errorData = await uploadResponse.json();
-          throw new Error(errorData.error || '画像のアップロードに失敗しました');
+        // 1. 画像のアップロード
+        if (formData.images.length > 0) {
+          const imageFormData = new FormData();
+          formData.images.forEach((file) => {
+            imageFormData.append('images', file);
+          });
+
+          const uploadResponse = await fetch('/api/upload', {
+            method: 'POST',
+            body: imageFormData,
+          });
+
+          if (!uploadResponse.ok) {
+            const errorData = await uploadResponse.json();
+            throw new Error(errorData.error || '画像のアップロードに失敗しました');
+          }
+
+          const uploadData = await uploadResponse.json();
+          imageUrls = uploadData.urls;
         }
 
-        const uploadData = await uploadResponse.json();
-        imageUrls = uploadData.urls;
-      }
+        // 2. スポットデータの作成
+        const spotData = {
+          ...formData,
+          images: imageUrls
+        };
 
-      // 2. スポットデータの作成
-      const spotData = {
-        ...formData,
-        images: imageUrls
-      };
-
-      const spotResponse = await fetch('/api/spots', {
-        method: 'POST',
+        const spotResponse = await fetch('/api/spots', {
+          method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -238,10 +278,11 @@ export default function NewSpotPage() {
         throw new Error(errorData.error || 'スポットの保存に失敗しました');
       }
 
-      await spotResponse.json();
-      
-      alert('スポットが正常に登録されました！');
-      router.push('/admin');
+        await spotResponse.json();
+        
+        alert('スポットが正常に登録されました！');
+        router.push('/admin');
+      }
     } catch (error) {
       console.error('Error saving spot:', error);
       alert(error instanceof Error ? error.message : '保存に失敗しました');

@@ -1,0 +1,244 @@
+カテゴリー,タグID,日本語名,英語名
+基本カテゴリー,cafe,カフェ,Cafe
+基本カテゴリー,restaurant,レストラン,Restaurant
+基本カテゴリー,bar,バー・居酒屋,Bar/Izakaya
+基本カテゴリー,shopping,ショッピング,Shopping
+基本カテゴリー,culture,文化・観光,Culture
+基本カテゴリー,entertainment,エンターテイメント,Entertainment
+基本カテゴリー,outdoor,アウトドア,Outdoor
+基本カテゴリー,wellness,ウェルネス,Wellness
+基本カテゴリー,accommodation,宿泊,Accommodation
+基本カテゴリー,transport,交通・移動,Transport
+基本カテゴリー,service,サービス,Service
+ジャンル,craft-beer,クラフトビール,Craft Beer
+ジャンル,sake,日本酒,Sake
+ジャンル,whiskey,ウイスキー,Whiskey
+ジャンル,wine,ワイン,Wine
+ジャンル,cocktail,カクテル,Cocktail
+ジャンル,coffee,コーヒー,Coffee
+ジャンル,tea,紅茶・日本茶,Tea
+ジャンル,bubble-tea,タピオカ,Bubble Tea
+ジャンル,juice,ジュース・スムージー,Juice/Smoothie
+ジャンル,japanese-food,和食,Japanese Food
+ジャンル,ramen,ラーメン,Ramen
+ジャンル,sushi,寿司,Sushi
+ジャンル,soba-udon,そば・うどん,Soba/Udon
+ジャンル,yakitori,焼き鳥,Yakitori
+ジャンル,tempura,天ぷら,Tempura
+ジャンル,yakiniku,焼肉,Yakiniku
+ジャンル,okonomiyaki,お好み焼き,Okonomiyaki
+ジャンル,takoyaki,たこ焼き,Takoyaki
+ジャンル,curry,カレー,Curry
+ジャンル,italian,イタリアン,Italian
+ジャンル,french,フレンチ,French
+ジャンル,chinese,中華,Chinese
+ジャンル,korean,韓国料理,Korean
+ジャンル,thai,タイ料理,Thai
+ジャンル,indian,インド料理,Indian
+ジャンル,western-food,洋食,Western Food
+ジャンル,fusion,フュージョン,Fusion
+ジャンル,vegetarian,ベジタリアン,Vegetarian
+ジャンル,vegan,ヴィーガン,Vegan
+ジャンル,halal,ハラール,Halal
+ジャンル,standing-bar,立ち飲み,Standing Bar
+ジャンル,izakaya,居酒屋,Izakaya
+ジャンル,robatayaki,炉端焼き,Robatayaki
+ジャンル,family-restaurant,ファミレス,Family Restaurant
+ジャンル,fast-food,ファストフード,Fast Food
+ジャンル,convenience-store,コンビニ,Convenience Store
+ジャンル,food-court,フードコート,Food Court
+ジャンル,street-food,屋台・ストリートフード,Street Food
+ジャンル,bento,弁当,Bento
+ジャンル,sweets,スイーツ,Sweets
+ジャンル,ice-cream,アイスクリーム,Ice Cream
+ジャンル,bakery,パン屋,Bakery
+ジャンル,patisserie,パティスリー,Patisserie
+ジャンル,vintage,古着・ヴィンテージ,Vintage
+ジャンル,fashion,ファッション,Fashion
+ジャンル,streetwear,ストリートウェア,Streetwear
+ジャンル,designer,デザイナーズ,Designer
+ジャンル,thrift,リサイクル・古着,Thrift
+ジャンル,accessories,アクセサリー,Accessories
+ジャンル,shoes,靴,Shoes
+ジャンル,bags,バッグ,Bags
+ジャンル,books,本・雑誌,Books
+ジャンル,manga,漫画,Manga
+ジャンル,music,音楽・レコード,Music
+ジャンル,vinyl,レコード,Vinyl Records
+ジャンル,cd,CD,CD
+ジャンル,instruments,楽器,Musical Instruments
+ジャンル,electronics,電子機器,Electronics
+ジャンル,games,ゲーム,Games
+ジャンル,anime,アニメグッズ,Anime Goods
+ジャンル,figures,フィギュア,Figures
+ジャンル,toys,おもちゃ,Toys
+ジャンル,art-supplies,アート用品,Art Supplies
+ジャンル,stationery,文房具,Stationery
+ジャンル,crafts,手芸・クラフト,Crafts
+ジャンル,souvenirs,お土産,Souvenirs
+ジャンル,department-store,デパート,Department Store
+ジャンル,shopping-mall,ショッピングモール,Shopping Mall
+ジャンル,flea-market,フリーマーケット,Flea Market
+ジャンル,temple-shrine,寺社,Temple/Shrine
+ジャンル,museum,美術館・博物館,Museum
+ジャンル,gallery,ギャラリー,Gallery
+ジャンル,traditional,伝統文化,Traditional Culture
+ジャンル,modern-art,現代アート,Modern Art
+ジャンル,pop-culture,ポップカルチャー,Pop Culture
+ジャンル,subculture,サブカルチャー,Subculture
+ジャンル,photography,写真,Photography
+ジャンル,calligraphy,書道,Calligraphy
+ジャンル,tea-ceremony,茶道,Tea Ceremony
+ジャンル,flower-arrangement,華道,Flower Arrangement
+ジャンル,kimono,着物,Kimono
+ジャンル,festivals,祭り・イベント,Festivals/Events
+ジャンル,seasonal,季節限定,Seasonal
+ジャンル,live-music,ライブ音楽,Live Music
+ジャンル,jazz,ジャズ,Jazz
+ジャンル,rock,ロック,Rock
+ジャンル,electronic,エレクトロニック,Electronic
+ジャンル,classical,クラシック,Classical
+ジャンル,folk,フォーク,Folk
+ジャンル,karaoke,カラオケ,Karaoke
+ジャンル,arcade,ゲームセンター,Arcade
+ジャンル,pachinko,パチンコ,Pachinko
+ジャンル,cinema,映画館,Cinema
+ジャンル,theater,劇場,Theater
+ジャンル,comedy,コメディ,Comedy
+ジャンル,dance,ダンス,Dance
+ジャンル,club,クラブ,Club
+ジャンル,lounge,ラウンジ,Lounge
+ジャンル,park,公園,Park
+ジャンル,garden,庭園,Garden
+ジャンル,river,川・水辺,River/Waterside
+ジャンル,view,景色・展望,Scenic View
+ジャンル,walking,散歩,Walking
+ジャンル,jogging,ジョギング,Jogging
+ジャンル,cycling,サイクリング,Cycling
+ジャンル,hiking,ハイキング,Hiking
+ジャンル,hot-spring,温泉,Hot Spring
+ジャンル,public-bath,銭湯,Public Bath
+ジャンル,spa,スパ,Spa
+ジャンル,massage,マッサージ,Massage
+ジャンル,yoga,ヨガ,Yoga
+ジャンル,gym,ジム,Gym
+ジャンル,meditation,瞑想,Meditation
+ジャンル,healing,ヒーリング,Healing
+ジャンル,beauty-salon,美容室,Beauty Salon
+ジャンル,nail-salon,ネイルサロン,Nail Salon
+ジャンル,barber,理容室,Barber
+ジャンル,hotel,ホテル,Hotel
+ジャンル,ryokan,旅館,Ryokan
+ジャンル,hostel,ホステル,Hostel
+ジャンル,guesthouse,ゲストハウス,Guesthouse
+ジャンル,capsule-hotel,カプセルホテル,Capsule Hotel
+ジャンル,airbnb,民泊,Vacation Rental
+ジャンル,love-hotel,ラブホテル,Love Hotel
+ジャンル,train-station,駅,Train Station
+ジャンル,bus-stop,バス停,Bus Stop
+ジャンル,taxi,タクシー,Taxi
+ジャンル,bike-rental,レンタサイクル,Bike Rental
+ジャンル,car-rental,レンタカー,Car Rental
+ジャンル,airport,空港,Airport
+旅行スタイル,solo-friendly,一人歓迎,Solo Friendly
+旅行スタイル,solo-perfect,一人旅に最適,Perfect for Solo
+旅行スタイル,counter-seating,カウンター席,Counter Seating
+旅行スタイル,communal-table,相席,Communal Table
+旅行スタイル,private-booth,個室・半個室,Private Booth
+旅行スタイル,quiet,静か,Quiet
+旅行スタイル,lively,賑やか,Lively
+旅行スタイル,cozy,アットホーム,Cozy
+旅行スタイル,spacious,広々,Spacious
+旅行スタイル,intimate,こじんまり,Intimate
+旅行スタイル,early-morning,早朝,Early Morning
+旅行スタイル,morning,朝,Morning
+旅行スタイル,brunch,ブランチ,Brunch
+旅行スタイル,lunch,ランチ,Lunch
+旅行スタイル,afternoon,午後,Afternoon
+旅行スタイル,happy-hour,ハッピーアワー,Happy Hour
+旅行スタイル,dinner,ディナー,Dinner
+旅行スタイル,evening,夕方,Evening
+旅行スタイル,late-night,深夜,Late Night
+旅行スタイル,all-night,24時間,24 Hours
+旅行スタイル,weekend,週末,Weekend
+旅行スタイル,weekday,平日,Weekday
+旅行スタイル,work-friendly,作業可,Work Friendly
+旅行スタイル,study-space,勉強向け,Good for Study
+旅行スタイル,reading,読書,Reading
+旅行スタイル,meeting,打ち合わせ,Meeting
+旅行スタイル,date,デート,Date
+旅行スタイル,business,ビジネス,Business
+旅行スタイル,networking,ネットワーキング,Networking
+旅行スタイル,socializing,交流,Socializing
+旅行スタイル,relaxation,リラックス,Relaxation
+旅行スタイル,contemplation,思索,Contemplation
+旅行スタイル,people-watching,人間観察,People Watching
+旅行スタイル,waiting,待ち時間,Waiting
+旅行スタイル,transit,乗り換え,Transit
+旅行スタイル,local-experience,ローカル体験,Local Experience
+旅行スタイル,hidden-gem,隠れ家,Hidden Gem
+旅行スタイル,tourist-spot,観光スポット,Tourist Spot
+旅行スタイル,off-beaten-path,穴場,Off the Beaten Path
+旅行スタイル,mainstream,メジャー,Mainstream
+旅行スタイル,underground,アンダーグラウンド,Underground
+旅行スタイル,trendy,トレンド,Trendy
+旅行スタイル,classic,定番,Classic
+旅行スタイル,nostalgic,ノスタルジック,Nostalgic
+旅行スタイル,modern,モダン,Modern
+旅行スタイル,retro,レトロ,Retro
+旅行スタイル,futuristic,未来的,Futuristic
+旅行スタイル,unique,ユニーク,Unique
+旅行スタイル,quirky,変わった,Quirky
+旅行スタイル,artistic,アーティスティック,Artistic
+旅行スタイル,minimalist,ミニマル,Minimalist
+旅行スタイル,maximalist,マキシマル,Maximalist
+旅行スタイル,photogenic,フォトジェニック,Photogenic
+旅行スタイル,instagram-worthy,インスタ映え,Instagram Worthy
+旅行スタイル,video-worthy,動画映え,Video Worthy
+旅行スタイル,authentic,本格的,Authentic
+旅行スタイル,experimental,実験的,Experimental
+旅行スタイル,seasonal,季節限定,Seasonal
+旅行スタイル,limited-time,期間限定,Limited Time
+旅行スタイル,permanent,通年,Year Round
+旅行スタイル,weather-dependent,天候次第,Weather Dependent
+旅行スタイル,indoor,屋内,Indoor
+旅行スタイル,outdoor,屋外,Outdoor
+旅行スタイル,covered,屋根あり,Covered
+旅行スタイル,free,無料,Free
+旅行スタイル,budget,格安,Budget
+旅行スタイル,affordable,リーズナブル,Affordable
+旅行スタイル,mid-range,中価格,Mid-range
+旅行スタイル,upscale,高級,Upscale
+旅行スタイル,luxury,超高級,Luxury
+旅行スタイル,good-value,コスパ良,Good Value
+旅行スタイル,english-friendly,英語対応,English Friendly
+旅行スタイル,multilingual,多言語対応,Multilingual
+旅行スタイル,sign-language,手話対応,Sign Language
+旅行スタイル,braille,点字対応,Braille
+旅行スタイル,wheelchair,車椅子対応,Wheelchair Accessible
+旅行スタイル,barrier-free,バリアフリー,Barrier-free
+旅行スタイル,elevator,エレベーター,Elevator
+旅行スタイル,ground-floor,地上階,Ground Floor
+旅行スタイル,pet-friendly,ペット可,Pet Friendly
+旅行スタイル,child-friendly,子供歓迎,Child Friendly
+旅行スタイル,adults-only,大人のみ,Adults Only
+旅行スタイル,smoking,喫煙可,Smoking Allowed
+旅行スタイル,non-smoking,禁煙,Non-smoking
+旅行スタイル,terrace,テラス席,Terrace
+旅行スタイル,rooftop,屋上,Rooftop
+旅行スタイル,basement,地下,Basement
+旅行スタイル,garden,庭,Garden
+旅行スタイル,cash-only,現金のみ,Cash Only
+旅行スタイル,card-accepted,カード可,Card Accepted
+旅行スタイル,contactless,タッチ決済,Contactless Payment
+旅行スタイル,mobile-payment,モバイル決済,Mobile Payment
+旅行スタイル,ic-card,ICカード,IC Card
+旅行スタイル,foreign-cards,海外カード可,Foreign Cards Accepted
+旅行スタイル,reservation-required,要予約,Reservation Required
+旅行スタイル,walk-in,飛び込み可,Walk-in Welcome
+旅行スタイル,queue-expected,行列覚悟,Queue Expected
+旅行スタイル,no-wait,待ち時間なし,No Wait
+旅行スタイル,crowded,混雑,Crowded
+旅行スタイル,peaceful,空いてる,Peaceful
+旅行スタイル,busy,忙しい,Busy
+旅行スタイル,leisurely,のんびり,Leisurely

@@ -249,52 +249,97 @@ export default function EditSpotPage({ params }: { params: Promise<{ id: string 
     setIsLoading(true);
 
     try {
-      let imageUrls: string[] = [...formData.existingImages];
-
-      // 新しい画像のアップロード
-      if (formData.images.length > 0) {
-        const imageFormData = new FormData();
-        formData.images.forEach((file) => {
-          imageFormData.append('images', file);
+      // 本番環境かどうかを判定
+      const isProduction = window.location.hostname !== 'localhost';
+      
+      if (isProduction) {
+        // 本番環境: GitHub API経由で更新
+        const imageDataPromises = formData.images.map(async (file) => {
+          return new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              const base64 = reader.result as string;
+              resolve(base64.split(',')[1]);
+            };
+            reader.readAsDataURL(file);
+          });
         });
-
-        const uploadResponse = await fetch('/api/upload', {
-          method: 'POST',
-          body: imageFormData,
+        
+        const newImageData = formData.images.length > 0 ? await Promise.all(imageDataPromises) : [];
+        
+        const response = await fetch('/api/admin/spots/github', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            id,
+            spot: {
+              ...formData,
+              images: formData.existingImages,
+            },
+            images: newImageData,
+          }),
         });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || errorData.details || 'スポットの更新に失敗しました');
+        }
+        
+        const data = await response.json();
+        alert(data.message || 'スポットを更新しました！2-3分後に反映されます。');
+        router.push('/admin');
+        
+      } else {
+        // ローカル環境: 従来通りの処理
+        let imageUrls: string[] = [...formData.existingImages];
 
-        if (!uploadResponse.ok) {
-          const errorData = await uploadResponse.json();
-          throw new Error(errorData.error || '画像のアップロードに失敗しました');
+        // 新しい画像のアップロード
+        if (formData.images.length > 0) {
+          const imageFormData = new FormData();
+          formData.images.forEach((file) => {
+            imageFormData.append('images', file);
+          });
+
+          const uploadResponse = await fetch('/api/upload', {
+            method: 'POST',
+            body: imageFormData,
+          });
+
+          if (!uploadResponse.ok) {
+            const errorData = await uploadResponse.json();
+            throw new Error(errorData.error || '画像のアップロードに失敗しました');
+          }
+
+          const uploadData = await uploadResponse.json();
+          imageUrls = [...imageUrls, ...uploadData.urls];
         }
 
-        const uploadData = await uploadResponse.json();
-        imageUrls = [...imageUrls, ...uploadData.urls];
+        // スポットデータの更新
+        const spotData = {
+          ...formData,
+          images: imageUrls
+        };
+
+        const spotResponse = await fetch(`/api/spots/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(spotData),
+        });
+
+        if (!spotResponse.ok) {
+          const errorData = await spotResponse.json();
+          throw new Error(errorData.error || 'スポットの更新に失敗しました');
+        }
+
+        await spotResponse.json();
+        
+        alert('スポットが正常に更新されました！');
+        router.push('/admin');
       }
-
-      // スポットデータの更新
-      const spotData = {
-        ...formData,
-        images: imageUrls
-      };
-
-      const spotResponse = await fetch(`/api/spots/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(spotData),
-      });
-
-      if (!spotResponse.ok) {
-        const errorData = await spotResponse.json();
-        throw new Error(errorData.error || 'スポットの更新に失敗しました');
-      }
-
-      await spotResponse.json();
-      
-      alert('スポットが正常に更新されました！');
-      router.push('/admin');
     } catch (error) {
       console.error('Error updating spot:', error);
       alert(error instanceof Error ? error.message : '更新に失敗しました');
