@@ -33,7 +33,8 @@ export function ImageGallery({ images, alt, className = '' }: ImageGalleryProps)
           className="object-cover rounded-lg"
           sizes="(max-width: 768px) 100vw, 50vw"
           style={{
-            imageOrientation: 'from-image',
+            imageOrientation: 'none',
+            transform: 'rotate(0deg)',
           }}
         />
       </div>
@@ -95,7 +96,8 @@ export function ImageGallery({ images, alt, className = '' }: ImageGalleryProps)
                     sizes="(max-width: 768px) 100vw, 50vw"
                     priority={index === 0}
                     style={{
-                      imageOrientation: 'from-image',
+                      imageOrientation: 'none',
+                      transform: 'rotate(0deg)',
                     }}
                   />
                 </div>
@@ -159,7 +161,8 @@ export function ImageGallery({ images, alt, className = '' }: ImageGalleryProps)
                 className="object-cover"
                 sizes="80px"
                 style={{
-                  imageOrientation: 'from-image',
+                  imageOrientation: 'none',
+                  transform: 'rotate(0deg)',
                 }}
               />
             </button>
