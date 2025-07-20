@@ -27,7 +27,7 @@ export default function TermsPage() {
               />
             </div>
             <h1 className="text-3xl font-bold mb-4">利用規約</h1>
-            <p className="text-gray-600">最終更新日: 2025年1月19日</p>
+            <p className="text-gray-600">最終更新日: 2025年7月1日</p>
           </div>
           
           <div className="space-y-8">
@@ -157,7 +157,7 @@ export default function TermsPage() {
               />
             </div>
             <h1 className="text-3xl font-bold mb-4">Terms of Service</h1>
-            <p className="text-gray-600">Last updated: January 19, 2025</p>
+            <p className="text-gray-600">Last updated: July 1, 2025</p>
           </div>
           
           <div className="space-y-8">

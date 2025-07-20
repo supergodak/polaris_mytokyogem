@@ -17,7 +17,7 @@ export default function PrivacyPage() {
         <div className="prose max-w-none">
           <h1 className="text-3xl font-bold mb-8">プライバシーポリシー</h1>
           
-          <p className="text-gray-600 mb-6">最終更新日: 2025年1月19日</p>
+          <p className="text-gray-600 mb-6">最終更新日: 2025年7月1日</p>
 
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">1. はじめに</h2>
@@ -71,8 +71,7 @@ export default function PrivacyPage() {
               本プライバシーポリシーに関するお問い合わせは、以下までご連絡ください：
             </p>
             <p className="mt-2">
-              ひとりあそび研究所<br />
-              メール: info@hitori-asobi.jp（仮）
+              ひとりあそび研究所
             </p>
           </section>
         </div>
@@ -80,7 +79,7 @@ export default function PrivacyPage() {
         <div className="prose max-w-none">
           <h1 className="text-3xl font-bold mb-8">Privacy Policy</h1>
           
-          <p className="text-gray-600 mb-6">Last updated: January 19, 2025</p>
+          <p className="text-gray-600 mb-6">Last updated: July 1, 2025</p>
 
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">1. Introduction</h2>
@@ -134,8 +133,7 @@ export default function PrivacyPage() {
               For questions about this Privacy Policy, please contact:
             </p>
             <p className="mt-2">
-              Solo Play Research Institute<br />
-              Email: info@hitori-asobi.jp (tentative)
+              Solo Play Research Institute
             </p>
           </section>
         </div>
