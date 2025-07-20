@@ -69,6 +69,22 @@ export default function AdminDashboard() {
         </div>
       </div>
 
+      {/* 本番環境での制限警告 */}
+      {process.env.NODE_ENV === 'production' && (
+        <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <div className="flex items-center">
+            <span className="text-yellow-600 text-xl mr-2">⚠️</span>
+            <div>
+              <h3 className="text-yellow-800 font-semibold">本番環境での制限事項</h3>
+              <p className="text-yellow-700 text-sm mt-1">
+                現在はPoC（実証実験）フェーズのため、本番環境ではスポットの編集・削除・新規作成機能は読み取り専用となっています。
+                データベース移行後に完全な編集機能が利用可能になります。
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <Card>
           <CardHeader>

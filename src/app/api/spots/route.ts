@@ -64,8 +64,16 @@ export async function POST(request: NextRequest) {
     spots.spots.push(newSpot);
     spots.lastUpdated = new Date().toISOString().split('T')[0];
 
-    // ファイルに保存
-    await fs.writeFile(SPOTS_FILE_PATH, JSON.stringify(spots, null, 2), 'utf-8');
+    // ファイルに保存（本番環境での書き込み制限をチェック）
+    try {
+      await fs.writeFile(SPOTS_FILE_PATH, JSON.stringify(spots, null, 2), 'utf-8');
+    } catch (writeError) {
+      console.error('File write error:', writeError);
+      return NextResponse.json({ 
+        error: 'Database write permission denied. This feature is read-only in production.',
+        details: process.env.NODE_ENV === 'development' ? String(writeError) : undefined
+      }, { status: 503 });
+    }
 
     return NextResponse.json({ 
       success: true, 
@@ -74,8 +82,10 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Error creating spot:', error);
+    console.error('Error details:', error instanceof Error ? error.message : String(error));
     return NextResponse.json({ 
-      error: 'Internal server error' 
+      error: 'Internal server error',
+      details: process.env.NODE_ENV === 'development' ? String(error) : undefined
     }, { status: 500 });
   }
 }
