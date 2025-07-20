@@ -190,7 +190,7 @@
       "id": "bar--682052",
       "title": {
         "ja": "てすとかふぇ",
-        "en": ""
+        "en": "Testa Café"
       },
       "description": {
         "ja": "いいねかふぇふぇしょうさい",
@@ -228,13 +228,14 @@
         "ja": "マスターはバンドマンです。年齢不詳だけど多分60くらいかな？",
         "en": ""
       },
-      "isHidden": false,
+      "isHidden": true,
       "reactions": {
         "interested": 0,
         "visited": 0
       },
       "createdBy": "ひとりあそび研究所",
-      "createdAt": "2025-01-15T09:00:00.000Z"
+      "createdAt": "2025-01-15T09:00:00.000Z",
+      "existingImages": []
     },
     {
       "id": "bar--848568",
