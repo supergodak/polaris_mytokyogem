@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
+import fs from 'fs/promises';
+import path from 'path';
 import { Spot } from '@/types/spot';
-import { getSpotById, updateSpot, deleteSpot } from '@/lib/supabase-data';
+
+const SPOTS_FILE_PATH = path.join(process.cwd(), 'data/spots.json');
 
 // 個別スポット取得API
 export async function GET(
@@ -10,7 +13,10 @@ export async function GET(
 ) {
   const { id } = await params;
   try {
-    const spot = await getSpotById(id);
+    const spotsData = await fs.readFile(SPOTS_FILE_PATH, 'utf-8');
+    const spots = JSON.parse(spotsData);
+    
+    const spot = spots.spots.find((s: Spot) => s.id === id);
     
     if (!spot || spot.isHidden) {
       return NextResponse.json({ error: 'Spot not found' }, { status: 404 });
@@ -47,12 +53,25 @@ export async function PUT(
       }, { status: 400 });
     }
 
-    // 更新データを作成
-    const updateData: Partial<Spot> = {
+    // 既存データを読み込み
+    const spotsData = await fs.readFile(SPOTS_FILE_PATH, 'utf-8');
+    const spots = JSON.parse(spotsData);
+    
+    // スポットを検索
+    const spotIndex = spots.spots.findIndex((s: Spot) => s.id === id);
+    
+    if (spotIndex === -1) {
+      return NextResponse.json({ error: 'Spot not found' }, { status: 404 });
+    }
+
+    // 既存のスポットデータを保持しつつ更新
+    const existingSpot = spots.spots[spotIndex];
+    const updatedSpot: Spot = {
+      ...existingSpot,
       title: formData.title,
       description: formData.description,
       shortDescription: formData.shortDescription,
-      images: formData.images,
+      images: formData.images || existingSpot.images,
       location: {
         lat: formData.location.lat,
         lng: formData.location.lng,
@@ -66,17 +85,18 @@ export async function PUT(
       businessHours: formData.businessHours || { ja: '', en: '' },
       access: formData.access || { ja: '', en: '' },
       tips: formData.tips || { ja: '', en: '' },
-      isHidden: formData.isHidden
+      isHidden: formData.isHidden !== undefined ? formData.isHidden : (existingSpot.isHidden || false),
+      reactions: existingSpot.reactions, // リアクションは保持
+      createdBy: existingSpot.createdBy, // 作成者も保持
+      createdAt: existingSpot.createdAt || new Date().toISOString() // 作成日時も保持
     };
 
-    // Supabaseでスポットを更新
-    const updatedSpot = await updateSpot(id, updateData);
+    // スポットを更新
+    spots.spots[spotIndex] = updatedSpot;
+    spots.lastUpdated = new Date().toISOString().split('T')[0];
 
-    if (!updatedSpot) {
-      return NextResponse.json({ 
-        error: 'Failed to update spot' 
-      }, { status: 500 });
-    }
+    // ファイルに保存
+    await fs.writeFile(SPOTS_FILE_PATH, JSON.stringify(spots, null, 2), 'utf-8');
 
     return NextResponse.json({ 
       success: true, 
@@ -85,16 +105,13 @@ export async function PUT(
 
   } catch (error) {
     console.error('Error updating spot:', error);
-    console.error('Spot ID:', id);
-    console.error('Error details:', error instanceof Error ? error.message : String(error));
     return NextResponse.json({ 
-      error: 'Internal server error',
-      details: process.env.NODE_ENV === 'development' ? String(error) : undefined
+      error: 'Internal server error' 
     }, { status: 500 });
   }
 }
 
-// スポット削除API
+// スポット削除API（オプション）
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -107,14 +124,23 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Supabaseでスポットを削除
-    const success = await deleteSpot(id);
-
-    if (!success) {
-      return NextResponse.json({ 
-        error: 'Failed to delete spot' 
-      }, { status: 500 });
+    // 既存データを読み込み
+    const spotsData = await fs.readFile(SPOTS_FILE_PATH, 'utf-8');
+    const spots = JSON.parse(spotsData);
+    
+    // スポットを検索
+    const spotIndex = spots.spots.findIndex((s: Spot) => s.id === id);
+    
+    if (spotIndex === -1) {
+      return NextResponse.json({ error: 'Spot not found' }, { status: 404 });
     }
+
+    // スポットを削除
+    spots.spots.splice(spotIndex, 1);
+    spots.lastUpdated = new Date().toISOString().split('T')[0];
+
+    // ファイルに保存
+    await fs.writeFile(SPOTS_FILE_PATH, JSON.stringify(spots, null, 2), 'utf-8');
 
     return NextResponse.json({ 
       success: true 

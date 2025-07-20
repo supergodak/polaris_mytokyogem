@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
-import { getAllSpots, createSpot } from '@/lib/supabase-data';
+import fs from 'fs/promises';
+import path from 'path';
+import { Spot } from '@/types/spot';
+
+const SPOTS_FILE_PATH = path.join(process.cwd(), 'data/spots.json');
 
 // スポット作成API
 export async function POST(request: NextRequest) {
@@ -20,12 +24,20 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
+    // 既存データを読み込み
+    const spotsData = await fs.readFile(SPOTS_FILE_PATH, 'utf-8');
+    const spots = JSON.parse(spotsData);
+
+    // 新しいIDを生成
+    const id = generateSpotId(formData.title.ja, formData.primaryCategory);
+
     // 新しいスポットデータを作成
-    const spotData = {
+    const newSpot: Spot = {
+      id,
       title: formData.title,
       description: formData.description,
       shortDescription: formData.shortDescription,
-      images: formData.images || [],
+      images: formData.images || [], // フロントエンドから送信された画像URLを使用
       location: {
         lat: formData.location.lat,
         lng: formData.location.lng,
@@ -44,17 +56,16 @@ export async function POST(request: NextRequest) {
         interested: 0,
         visited: 0
       },
-      createdBy: 'ひとりあそび研究所'
+      createdBy: 'ひとりあそび研究所',
+      createdAt: new Date().toISOString()
     };
 
-    // Supabaseにデータを保存
-    const newSpot = await createSpot(spotData);
+    // スポットリストに追加
+    spots.spots.push(newSpot);
+    spots.lastUpdated = new Date().toISOString().split('T')[0];
 
-    if (!newSpot) {
-      return NextResponse.json({ 
-        error: 'Failed to create spot in database' 
-      }, { status: 500 });
-    }
+    // ファイルに保存
+    await fs.writeFile(SPOTS_FILE_PATH, JSON.stringify(spots, null, 2), 'utf-8');
 
     return NextResponse.json({ 
       success: true, 
@@ -63,72 +74,47 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Error creating spot:', error);
-    console.error('Error details:', error instanceof Error ? error.message : String(error));
     return NextResponse.json({ 
-      error: 'Internal server error',
-      details: process.env.NODE_ENV === 'development' ? String(error) : undefined
+      error: 'Internal server error' 
     }, { status: 500 });
   }
 }
 
 // スポット一覧取得API
 export async function GET() {
-  console.log('🚀 [API] /api/spots called');
-  console.log('🌍 [API] Environment:', process.env.NODE_ENV);
-  
-  // 診断情報を収集
-  const diagnostics = {
-    environment: process.env.NODE_ENV,
-    hasSupabaseUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
-    hasSupabaseKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    supabaseUrlLength: process.env.NEXT_PUBLIC_SUPABASE_URL?.length || 0,
-    timestamp: new Date().toISOString()
-  };
-  
-  console.log('🔧 [API] Diagnostics:', diagnostics);
-  
   try {
-    // Supabaseから公開スポットを取得
-    const spots = await getAllSpots();
-    console.log('📦 [API] Received spots from getAllSpots:', spots.length);
+    const spotsData = await fs.readFile(SPOTS_FILE_PATH, 'utf-8');
+    const spots = JSON.parse(spotsData);
     
-    // 既存のJSONレスポンス形式と互換性を保つ + 診断情報
-    const response = {
-      spots: spots,
-      lastUpdated: new Date().toISOString().split('T')[0],
-      // 開発環境でのみ診断情報を含める
-      ...(process.env.NODE_ENV === 'development' && { 
-        _debug: {
-          spotsCount: spots.length,
-          diagnostics: diagnostics
-        }
-      })
+    // 非表示スポットを除外
+    const visibleSpots = {
+      ...spots,
+      spots: spots.spots.filter((spot: Spot) => !spot.isHidden)
     };
     
-    console.log('✅ [API] Returning response with', response.spots.length, 'spots');
-    
-    // 本番環境でもエラー情報を一時的に含める
-    if (spots.length === 0) {
-      return NextResponse.json({
-        ...response,
-        _productionDebug: {
-          message: 'No spots returned from Supabase',
-          diagnostics: diagnostics,
-          timestamp: new Date().toISOString()
-        }
-      });
-    }
-    
-    return NextResponse.json(response);
+    return NextResponse.json(visibleSpots);
   } catch (error) {
-    console.error('❌ [API] Error in GET /api/spots:', error);
+    console.error('Error fetching spots:', error);
     return NextResponse.json({ 
-      error: 'Failed to fetch spots',
-      _productionDebug: {
-        errorMessage: error instanceof Error ? error.message : String(error),
-        diagnostics: diagnostics
-      }
+      error: 'Failed to fetch spots' 
     }, { status: 500 });
   }
 }
 
+// ID生成ヘルパー関数
+function generateSpotId(title: string, category: string): string {
+  // タイトルから安全な文字列を生成
+  const safeTitle = title
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .slice(0, 20);
+  
+  // カテゴリーの略称
+  const categoryPrefix = category.slice(0, 4);
+  
+  // タイムスタンプ
+  const timestamp = Date.now().toString().slice(-6);
+  
+  return `${categoryPrefix}-${safeTitle}-${timestamp}`;
+}

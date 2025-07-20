@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSpotById, updateSpotReactions } from '@/lib/supabase-data';
+import fs from 'fs/promises';
+import path from 'path';
+import { Spot } from '@/types/spot';
+
+const SPOTS_FILE_PATH = path.join(process.cwd(), 'data/spots.json');
 
 // リアクション更新API
 export async function POST(
@@ -30,35 +34,36 @@ export async function POST(
       }, { status: 400 });
     }
 
-    // 現在のスポットを取得
-    const currentSpot = await getSpotById(id);
+    // スポットデータを読み込み
+    const spotsData = await fs.readFile(SPOTS_FILE_PATH, 'utf-8');
+    const spots = JSON.parse(spotsData);
     
-    if (!currentSpot) {
+    // 対象スポットを探す
+    const spotIndex = spots.spots.findIndex((spot: Spot) => spot.id === id);
+    
+    if (spotIndex === -1) {
       return NextResponse.json({ error: 'Spot not found' }, { status: 404 });
     }
 
     // リアクション数を更新
+    const currentSpot = spots.spots[spotIndex];
     const currentReactions = currentSpot.reactions || { interested: 0, visited: 0 };
-    const newReactions = { ...currentReactions };
     
     if (action === 'add') {
-      newReactions[type as keyof typeof newReactions] = (newReactions[type as keyof typeof newReactions] || 0) + 1;
-    } else if (action === 'remove' && newReactions[type as keyof typeof newReactions] > 0) {
-      newReactions[type as keyof typeof newReactions] = newReactions[type as keyof typeof newReactions] - 1;
+      currentReactions[type as keyof typeof currentReactions] = (currentReactions[type as keyof typeof currentReactions] || 0) + 1;
+    } else if (action === 'remove' && currentReactions[type as keyof typeof currentReactions] > 0) {
+      currentReactions[type as keyof typeof currentReactions] = currentReactions[type as keyof typeof currentReactions] - 1;
     }
 
-    // Supabaseでリアクションを更新
-    const success = await updateSpotReactions(id, newReactions);
+    // スポットのリアクションを更新
+    spots.spots[spotIndex].reactions = currentReactions;
     
-    if (!success) {
-      return NextResponse.json({ 
-        error: 'Failed to update reactions' 
-      }, { status: 500 });
-    }
+    // ファイルに保存
+    await fs.writeFile(SPOTS_FILE_PATH, JSON.stringify(spots, null, 2), 'utf-8');
 
     return NextResponse.json({ 
       success: true,
-      reactions: newReactions
+      reactions: currentReactions
     });
 
   } catch (error) {

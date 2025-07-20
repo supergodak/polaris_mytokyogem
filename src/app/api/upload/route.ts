@@ -1,18 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
-import { supabase } from '@/lib/supabase';
+import fs from 'fs/promises';
+import path from 'path';
+
+const UPLOAD_DIR = path.join(process.cwd(), 'public/uploads');
 
 // 画像アップロードAPI
 export async function POST(request: NextRequest) {
-  console.log('🖼️ [UPLOAD] Starting upload process...');
-  console.log('🔧 Environment:', process.env.NODE_ENV);
-  console.log('🔑 Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL?.substring(0, 30) + '...');
-  
   try {
     // 認証チェック
     const session = await getServerSession();
     if (!session?.user) {
-      console.error('❌ [UPLOAD] Unauthorized - no session');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -25,8 +23,13 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // Supabase Storageのバケット名
-    const bucketName = 'spot-image';
+    // アップロードディレクトリを作成（存在しない場合）
+    try {
+      await fs.mkdir(UPLOAD_DIR, { recursive: true });
+    } catch (mkdirError) {
+      // ディレクトリが既に存在する場合はエラーを無視
+      console.log('Directory creation error (likely already exists):', mkdirError);
+    }
 
     const uploadedFiles: string[] = [];
 
@@ -35,6 +38,7 @@ export async function POST(request: NextRequest) {
       const timestamp = Date.now();
       const originalName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
       const fileName = `${timestamp}_${originalName}`;
+      const filePath = path.join(UPLOAD_DIR, fileName);
 
       // ファイルサイズチェック（10MB制限）
       if (file.size > 10 * 1024 * 1024) {
@@ -51,38 +55,12 @@ export async function POST(request: NextRequest) {
       }
 
       try {
-        // ファイルをSupabase Storageにアップロード
-        console.log(`📤 [UPLOAD] Uploading ${file.name} (${file.size} bytes, ${file.type})...`);
+        // ファイルを保存
         const buffer = await file.arrayBuffer();
-        const { error } = await supabase.storage
-          .from(bucketName)
-          .upload(fileName, buffer, {
-            contentType: file.type,
-            cacheControl: '3600',
-            upsert: false
-          });
-
-        if (error) {
-          console.error(`❌ [UPLOAD] Supabase error for ${file.name}:`, {
-            message: error.message,
-            status: 'status' in error ? (error as {status: string}).status : 'unknown',
-            statusCode: 'statusCode' in error ? (error as {statusCode: string}).statusCode : 'unknown',
-            details: 'details' in error ? (error as {details: string}).details : 'none',
-            hint: 'hint' in error ? (error as {hint: string}).hint : 'none'
-          });
-          return NextResponse.json({ 
-            error: `Failed to upload file ${file.name}: ${error.message}`,
-            details: process.env.NODE_ENV === 'development' ? error : undefined
-          }, { status: 500 });
-        }
+        await fs.writeFile(filePath, Buffer.from(buffer));
         
-        console.log(`✅ [UPLOAD] Successfully uploaded ${file.name}`);
-
         // 公開URLを生成
-        const { data: { publicUrl } } = supabase.storage
-          .from(bucketName)
-          .getPublicUrl(fileName);
-        
+        const publicUrl = `/uploads/${fileName}`;
         uploadedFiles.push(publicUrl);
       } catch (saveError) {
         console.error(`Error saving file ${file.name}:`, saveError);
@@ -98,14 +76,9 @@ export async function POST(request: NextRequest) {
     }, { status: 200 });
 
   } catch (uploadError) {
-    console.error('💥 [UPLOAD] Unexpected error:', {
-      name: uploadError instanceof Error ? uploadError.name : 'Unknown',
-      message: uploadError instanceof Error ? uploadError.message : String(uploadError),
-      stack: uploadError instanceof Error ? uploadError.stack : undefined
-    });
+    console.error('Error uploading files:', uploadError);
     return NextResponse.json({ 
-      error: 'Internal server error',
-      details: process.env.NODE_ENV === 'development' ? String(uploadError) : undefined
+      error: 'Internal server error' 
     }, { status: 500 });
   }
 }
