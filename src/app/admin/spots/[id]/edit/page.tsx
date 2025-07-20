@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { TagSelector } from '@/components/ui/tag-selector';
@@ -149,13 +150,13 @@ export default function EditSpotPage({ params }: { params: Promise<{ id: string 
     );
   }
 
-  const handleInputChange = (field: string, value: any, lang?: 'ja' | 'en') => {
+  const handleInputChange = (field: string, value: string | boolean | string[] | File[], lang?: 'ja' | 'en') => {
     setFormData(prev => {
       if (lang) {
         return {
           ...prev,
           [field]: {
-            ...prev[field as keyof SpotFormData],
+            ...(prev[field as keyof SpotFormData] as Record<string, unknown>),
             [lang]: value
           }
         };
@@ -167,7 +168,7 @@ export default function EditSpotPage({ params }: { params: Promise<{ id: string 
     });
   };
 
-  const handleLocationChange = (field: string, value: any) => {
+  const handleLocationChange = (field: string, value: number | boolean) => {
     setFormData(prev => ({
       ...prev,
       location: {
@@ -238,7 +239,7 @@ export default function EditSpotPage({ params }: { params: Promise<{ id: string 
     if (fieldType === 'address') {
       translateField('address', jaValue, formData.location.address.en);
     } else {
-      const enValue = (formData as any)[fieldType]?.en || '';
+      const enValue = (formData as unknown as Record<string, { en: string }>)[fieldType]?.en || '';
       translateField(fieldType, jaValue, enValue);
     }
   };
@@ -290,7 +291,7 @@ export default function EditSpotPage({ params }: { params: Promise<{ id: string 
         throw new Error(errorData.error || 'スポットの更新に失敗しました');
       }
 
-      const spotResult = await spotResponse.json();
+      await spotResponse.json();
       
       alert('スポットが正常に更新されました！');
       router.push('/admin');
@@ -444,9 +445,11 @@ export default function EditSpotPage({ params }: { params: Promise<{ id: string 
                 <div className="grid grid-cols-3 gap-2">
                   {formData.existingImages.map((url, index) => (
                     <div key={index} className="relative">
-                      <img
+                      <Image
                         src={url}
                         alt={`既存画像 ${index + 1}`}
+                        width={96}
+                        height={96}
                         className="w-full h-24 object-cover rounded-lg"
                       />
                       <button

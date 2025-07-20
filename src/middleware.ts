@@ -1,7 +1,7 @@
 import { withAuth } from 'next-auth/middleware';
 
 export default withAuth(
-  function middleware(req) {
+  function middleware() {
     // この関数は認証が成功した場合のみ実行される
   },
   {

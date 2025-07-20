@@ -42,7 +42,7 @@ export default function TermsPage() {
               <h2 className="text-2xl font-semibold mb-4">第2条（サービスの内容）</h2>
               <div className="text-gray-700 leading-relaxed space-y-3">
                 <p>本サービスは、東京のローカルスポット情報を共有するプラットフォームです。</p>
-                <p>現在は実証実験（PoC）フェーズであり、以下の機能を提供しています：</p>
+                <p>現在は実証実験（PoC）フェーズであり、以下の機能を提供しています:</p>
                 <ul className="list-disc pl-6 space-y-1">
                   <li>スポット情報の閲覧</li>
                   <li>「気になる」スポットの保存機能（ローカルストレージ使用）</li>
@@ -55,7 +55,7 @@ export default function TermsPage() {
             <section>
               <h2 className="text-2xl font-semibold mb-4">第3条（利用者の責任）</h2>
               <div className="text-gray-700 leading-relaxed space-y-3">
-                <p>利用者は、以下の事項について責任を負うものとします：</p>
+                <p>利用者は、以下の事項について責任を負うものとします:</p>
                 <ul className="list-disc pl-6 space-y-1">
                   <li>本サービスの利用にあたり、法令および本規約を遵守すること</li>
                   <li>他の利用者や第三者の権利を侵害しないこと</li>
@@ -68,7 +68,7 @@ export default function TermsPage() {
             <section>
               <h2 className="text-2xl font-semibold mb-4">第4条（禁止事項）</h2>
               <div className="text-gray-700 leading-relaxed space-y-3">
-                <p>利用者は、本サービスの利用にあたり、以下の行為を行ってはなりません：</p>
+                <p>利用者は、本サービスの利用にあたり、以下の行為を行ってはなりません:</p>
                 <ul className="list-disc pl-6 space-y-1">
                   <li>法令に違反する行為</li>
                   <li>公序良俗に反する行為</li>
@@ -91,7 +91,7 @@ export default function TermsPage() {
             <section>
               <h2 className="text-2xl font-semibold mb-4">第6条（免責事項）</h2>
               <div className="text-gray-700 leading-relaxed space-y-3">
-                <p>当団体は、以下について一切の責任を負いません：</p>
+                <p>当団体は、以下について一切の責任を負いません:</p>
                 <ul className="list-disc pl-6 space-y-1">
                   <li>本サービスで提供される情報の正確性、完全性、有用性</li>
                   <li>利用者が本サービスを利用して行った行動の結果</li>
@@ -164,7 +164,7 @@ export default function TermsPage() {
             <section>
               <h2 className="text-2xl font-semibold mb-4">Article 1 (Application of Terms)</h2>
               <p className="text-gray-700 leading-relaxed">
-                These Terms of Service ("Terms") set forth the conditions for using "MyTokyoGem" ("Service") provided by Hitoriasobi Lab ("We"). By using this Service, you are deemed to have agreed to these Terms.
+                These Terms of Service (&ldquo;Terms&rdquo;) set forth the conditions for using &ldquo;MyTokyoGem&rdquo; (&ldquo;Service&rdquo;) provided by Hitoriasobi Lab (&ldquo;We&rdquo;). By using this Service, you are deemed to have agreed to these Terms.
               </p>
             </section>
 
@@ -175,7 +175,7 @@ export default function TermsPage() {
                 <p>Currently in proof-of-concept (PoC) phase, providing the following features:</p>
                 <ul className="list-disc pl-6 space-y-1">
                   <li>Browsing spot information</li>
-                  <li>"Favorite" spot saving function (using local storage)</li>
+                  <li>&ldquo;Favorite&rdquo; spot saving function (using local storage)</li>
                   <li>Information in both Japanese and English</li>
                   <li>Contact functionality</li>
                 </ul>
@@ -237,7 +237,7 @@ export default function TermsPage() {
             <section>
               <h2 className="text-2xl font-semibold mb-4">Article 7 (Personal Information Handling)</h2>
               <p className="text-gray-700 leading-relaxed">
-                We handle users' personal information appropriately in accordance with our "Privacy Policy". For details, please refer to our
+                We handle users&apos; personal information appropriately in accordance with our &ldquo;Privacy Policy&rdquo;. For details, please refer to our
                 <Link href="/privacy" className="text-blue-600 hover:text-blue-800 underline"> Privacy Policy</Link>.
               </p>
             </section>

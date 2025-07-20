@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
+import { getServerSession } from 'next-auth/next';
 import fs from 'fs/promises';
 import path from 'path';
 import { Spot } from '@/types/spot';

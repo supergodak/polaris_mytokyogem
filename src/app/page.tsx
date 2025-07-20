@@ -9,7 +9,7 @@ import { Spot } from '@/types/spot';
 export default function Home() {
   const { language } = useLanguage();
   const [spots, setSpots] = useState<Spot[]>(getAllSpotsSync());
-  const [isLoading, setIsLoading] = useState(false);
+  const [, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchSpots = async () => {

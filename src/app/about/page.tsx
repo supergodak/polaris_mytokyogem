@@ -40,27 +40,27 @@ export default function AboutPage() {
             <p>
               旅先でよくある「どこ行っても人だらけ問題」。<br />
               ガイドブックを閉じて、もっと静かな場所、<br />
-              もっと"自分の旅"をしたくなること、ありませんか？
+              もっと&ldquo;自分の旅&rdquo;をしたくなること、ありませんか？
             </p>
 
             <div className="bg-blue-50 p-6 rounded-lg">
               <p className="text-gray-800">
                 <span className="font-semibold text-blue-900">マイ・トーキョー・ジェム</span> は、<br />
                 誰かに教えたくなるけど、大声では言いたくないような<br />
-                東京の「小さな宝石たち」をそっと集めていく場所です。
+                東京の&ldquo;小さな宝石たち&rdquo;をそっと集めていく場所です。
               </p>
             </div>
 
             <p>
               地元に住むふつうの人たちが、<br />
-              「自分が好きな場所」をこっそり投稿していきます。<br />
+              &ldquo;自分が好きな場所&rdquo;をこっそり投稿していきます。<br />
               お店や観光地とのしがらみもなく、広告もなし。<br />
               いいと思ったから、ただそれだけで紹介されてます。
             </p>
 
             <p>
               まだ機能も投稿数もスカスカですが、<br />
-              ここからゆっくり、旅人と東京の"ちょうどいい関係"を育てていけたらと思っています。
+              ここからゆっくり、旅人と東京の&ldquo;ちょうどいい関係&rdquo;を育てていけたらと思っています。
             </p>
 
             <div className="bg-gray-50 p-6 rounded-lg">
@@ -81,7 +81,7 @@ export default function AboutPage() {
             <div className="text-center bg-green-50 p-6 rounded-lg">
               <p className="text-green-800 font-medium">
                 東京にも、まだ知られてないいい場所、きっとたくさんあります。<br />
-                あなただけの「My Tokyo Gem」を、これから一緒に探していけますように。
+                あなただけの&ldquo;My Tokyo Gem&rdquo;を、これから一緒に探していけますように。
               </p>
             </div>
           </div>
@@ -114,49 +114,49 @@ export default function AboutPage() {
           
           <div className="space-y-6 text-gray-700 leading-relaxed">
             <p>
-              While we're not quite ready to show this to the world yet,<br />
+              While we&apos;re not quite ready to show this to the world yet,<br />
               we felt it was time to let a few people discover<br />
-              this project that brings you the real "now" of Tokyo.
+              this project that brings you the real &ldquo;now&rdquo; of Tokyo.
             </p>
 
             <p>
-              You know that common travel problem: "everywhere is packed with people."<br />
+              You know that common travel problem: &ldquo;everywhere is packed with people.&rdquo;<br />
               Sometimes you want to close the guidebook and find quieter places,<br />
-              more space for "your own journey," don't you?
+              more space for &ldquo;your own journey,&rdquo; don&apos;t you?
             </p>
 
             <div className="bg-blue-50 p-6 rounded-lg">
               <p className="text-gray-800">
                 <span className="font-semibold text-blue-900">MyTokyoGem</span> is a place where we quietly collect<br />
-                Tokyo's "little treasures" – places you'd want to tell someone about<br />
-                but wouldn't shout from the rooftops.
+                Tokyo&apos;s &ldquo;little treasures&rdquo; – places you&apos;d want to tell someone about<br />
+                but wouldn&apos;t shout from the rooftops.
               </p>
             </div>
 
             <p>
               Local residents quietly post about<br />
-              "places they personally love."<br />
+              &ldquo;places they personally love.&rdquo;<br />
               No ties to businesses or tourist spots, no advertisements.<br />
-              They're shared simply because someone thought they were special.
+              They&apos;re shared simply because someone thought they were special.
             </p>
 
             <p>
               The features and posts are still sparse,<br />
-              but we hope to slowly nurture the "just right relationship"<br />
+              but we hope to slowly nurture the &ldquo;just right relationship&rdquo;<br />
               between travelers and Tokyo from here.
             </p>
 
             <div className="bg-gray-50 p-6 rounded-lg">
               <p className="text-gray-600 text-sm">
                 Data might disappear, maps might break, various things could happen,<br />
-                but we'd be grateful if you could warmly watch over<br />
+                but we&apos;d be grateful if you could warmly watch over<br />
                 this experiment with us.
               </p>
             </div>
 
             <p>
               We gratefully read all messages to the team,<br />
-              quiet encouragement, and tips about "how about this place?"<br />
+              quiet encouragement, and tips about &ldquo;how about this place?&rdquo;<br />
               So please feel free to reach out.<br />
               <Link href="/contact" className="text-blue-600 hover:text-blue-800 underline">
                 (Contact form is here)
@@ -166,7 +166,7 @@ export default function AboutPage() {
             <div className="text-center bg-green-50 p-6 rounded-lg">
               <p className="text-green-800 font-medium">
                 Tokyo surely has many more unknown good places.<br />
-                May we explore your own "My Tokyo Gem" together from now on.
+                May we explore your own &ldquo;My Tokyo Gem&rdquo; together from now on.
               </p>
             </div>
           </div>

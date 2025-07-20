@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
+import { getServerSession } from 'next-auth/next';
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -26,8 +26,9 @@ export async function POST(request: NextRequest) {
     // アップロードディレクトリを作成（存在しない場合）
     try {
       await fs.mkdir(UPLOAD_DIR, { recursive: true });
-    } catch (error) {
+    } catch (mkdirError) {
       // ディレクトリが既に存在する場合はエラーを無視
+      console.log('Directory creation error (likely already exists):', mkdirError);
     }
 
     const uploadedFiles: string[] = [];
@@ -61,8 +62,8 @@ export async function POST(request: NextRequest) {
         // 公開URLを生成
         const publicUrl = `/uploads/${fileName}`;
         uploadedFiles.push(publicUrl);
-      } catch (error) {
-        console.error(`Error saving file ${file.name}:`, error);
+      } catch (saveError) {
+        console.error(`Error saving file ${file.name}:`, saveError);
         return NextResponse.json({ 
           error: `Failed to save file ${file.name}` 
         }, { status: 500 });
@@ -74,8 +75,8 @@ export async function POST(request: NextRequest) {
       urls: uploadedFiles 
     }, { status: 200 });
 
-  } catch (error) {
-    console.error('Error uploading files:', error);
+  } catch (uploadError) {
+    console.error('Error uploading files:', uploadError);
     return NextResponse.json({ 
       error: 'Internal server error' 
     }, { status: 500 });

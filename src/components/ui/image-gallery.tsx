@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import Image from 'next/image';
 
 interface ImageGalleryProps {
@@ -74,8 +74,7 @@ export function ImageGallery({ images, alt, className = '' }: ImageGalleryProps)
           className="overflow-x-auto snap-x snap-mandatory scrollbar-hide"
           style={{
             scrollbarWidth: 'none',
-            msOverflowStyle: 'none',
-            WebkitScrollbar: { display: 'none' }
+            msOverflowStyle: 'none'
           }}
         >
           <div className="flex">

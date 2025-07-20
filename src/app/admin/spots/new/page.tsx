@@ -97,13 +97,13 @@ export default function NewSpotPage() {
     return null;
   }
 
-  const handleInputChange = (field: string, value: any, lang?: 'ja' | 'en') => {
+  const handleInputChange = (field: string, value: string | boolean | string[] | File[], lang?: 'ja' | 'en') => {
     setFormData(prev => {
       if (lang) {
         return {
           ...prev,
           [field]: {
-            ...prev[field as keyof SpotFormData],
+            ...(prev[field as keyof SpotFormData] as Record<string, unknown>),
             [lang]: value
           }
         };
@@ -115,7 +115,7 @@ export default function NewSpotPage() {
     });
   };
 
-  const handleLocationChange = (field: string, value: any) => {
+  const handleLocationChange = (field: string, value: number | boolean) => {
     setFormData(prev => ({
       ...prev,
       location: {
@@ -186,7 +186,7 @@ export default function NewSpotPage() {
     if (fieldType === 'address') {
       translateField('address', jaValue, formData.location.address.en);
     } else {
-      const enValue = (formData as any)[fieldType]?.en || '';
+      const enValue = (formData as unknown as Record<string, { en: string }>)[fieldType]?.en || '';
       translateField(fieldType, jaValue, enValue);
     }
   };
@@ -238,7 +238,7 @@ export default function NewSpotPage() {
         throw new Error(errorData.error || 'スポットの保存に失敗しました');
       }
 
-      const spotResult = await spotResponse.json();
+      await spotResponse.json();
       
       alert('スポットが正常に登録されました！');
       router.push('/admin');

@@ -37,7 +37,7 @@ export default function AdminLogin() {
       } else {
         router.push('/admin');
       }
-    } catch (error) {
+    } catch {
       setError('ログインに失敗しました');
     } finally {
       setIsLoading(false);

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import Image from 'next/image';
 import { Button } from './button';
 
 interface ImageUploadProps {
@@ -89,9 +90,11 @@ export function ImageUpload({ onImagesChange, maxImages = 5, existingImages = []
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {existingImages.map((url, index) => (
               <div key={`existing-${index}`} className="relative group">
-                <img
+                <Image
                   src={url}
                   alt={`既存画像 ${index + 1}`}
+                  width={128}
+                  height={128}
                   className="w-full h-32 object-cover rounded-lg border border-gray-200"
                 />
                 <button
@@ -116,9 +119,11 @@ export function ImageUpload({ onImagesChange, maxImages = 5, existingImages = []
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {previewUrls.map((url, index) => (
               <div key={`new-${index}`} className="relative group">
-                <img
+                <Image
                   src={url}
                   alt={`プレビュー ${index + 1}`}
+                  width={128}
+                  height={128}
                   className="w-full h-32 object-cover rounded-lg border border-gray-200"
                 />
                 <button
@@ -145,7 +150,7 @@ export function ImageUpload({ onImagesChange, maxImages = 5, existingImages = []
           const files = Array.from(e.dataTransfer.files);
           const imageFiles = files.filter(file => file.type.startsWith('image/'));
           if (imageFiles.length > 0) {
-            handleFileSelect({ target: { files: imageFiles } } as any);
+            handleFileSelect({ target: { files: imageFiles } } as unknown as React.ChangeEvent<HTMLInputElement>);
           }
         }}
         onDragOver={(e) => e.preventDefault()}

@@ -1,7 +1,7 @@
-import NextAuth, { NextAuthOptions } from 'next-auth';
+import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 
-const authOptions: NextAuthOptions = {
+const authOptions = {
   providers: [
     CredentialsProvider({
       name: 'credentials',
@@ -27,20 +27,21 @@ const authOptions: NextAuthOptions = {
     strategy: 'jwt'
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user }: { token: Record<string, unknown>; user: Record<string, unknown> | undefined }) {
       if (user) {
         token.role = 'admin';
       }
       return token;
     },
-    async session({ session, token }) {
-      if (session.user) {
-        (session.user as any).role = token.role;
+    async session({ session, token }: { session: Record<string, unknown>; token: Record<string, unknown> }) {
+      if (session.user && typeof session.user === 'object' && session.user !== null) {
+        (session.user as Record<string, unknown>).role = token.role as string;
       }
       return session;
     }
   }
 };
 
+// @ts-expect-error - NextAuth types issue
 const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };
