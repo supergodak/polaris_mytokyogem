@@ -281,7 +281,17 @@ export async function uploadImageToSupabase(
     .from('spot-images')
     .getPublicUrl(data.path);
 
-  return urlData.publicUrl;
+  // ダブルスラッシュを修正
+  const cleanUrl = urlData.publicUrl.replace(/\/\/+/g, '/').replace(':/', '://');
+  
+  console.log('📸 [Storage] Upload successful:', {
+    fileName,
+    path: data.path,
+    originalUrl: urlData.publicUrl,
+    cleanUrl
+  });
+
+  return cleanUrl;
 }
 
 // Base64画像をSupabase Storageにアップロード
