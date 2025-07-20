@@ -76,23 +76,58 @@ export async function GET() {
   console.log('🚀 [API] /api/spots called');
   console.log('🌍 [API] Environment:', process.env.NODE_ENV);
   
+  // 診断情報を収集
+  const diagnostics = {
+    environment: process.env.NODE_ENV,
+    hasSupabaseUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+    hasSupabaseKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    supabaseUrlLength: process.env.NEXT_PUBLIC_SUPABASE_URL?.length || 0,
+    timestamp: new Date().toISOString()
+  };
+  
+  console.log('🔧 [API] Diagnostics:', diagnostics);
+  
   try {
     // Supabaseから公開スポットを取得
     const spots = await getAllSpots();
     console.log('📦 [API] Received spots from getAllSpots:', spots.length);
     
-    // 既存のJSONレスポンス形式と互換性を保つ
+    // 既存のJSONレスポンス形式と互換性を保つ + 診断情報
     const response = {
       spots: spots,
-      lastUpdated: new Date().toISOString().split('T')[0]
+      lastUpdated: new Date().toISOString().split('T')[0],
+      // 開発環境でのみ診断情報を含める
+      ...(process.env.NODE_ENV === 'development' && { 
+        _debug: {
+          spotsCount: spots.length,
+          diagnostics: diagnostics
+        }
+      })
     };
     
     console.log('✅ [API] Returning response with', response.spots.length, 'spots');
+    
+    // 本番環境でもエラー情報を一時的に含める
+    if (spots.length === 0) {
+      return NextResponse.json({
+        ...response,
+        _productionDebug: {
+          message: 'No spots returned from Supabase',
+          diagnostics: diagnostics,
+          timestamp: new Date().toISOString()
+        }
+      });
+    }
+    
     return NextResponse.json(response);
   } catch (error) {
     console.error('❌ [API] Error in GET /api/spots:', error);
     return NextResponse.json({ 
-      error: 'Failed to fetch spots' 
+      error: 'Failed to fetch spots',
+      _productionDebug: {
+        errorMessage: error instanceof Error ? error.message : String(error),
+        diagnostics: diagnostics
+      }
     }, { status: 500 });
   }
 }
