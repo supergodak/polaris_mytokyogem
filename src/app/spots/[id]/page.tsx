@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -13,6 +13,7 @@ import { getLocalizedContent } from '@/lib/i18n';
 import { generateGoogleMapsUrl, generateGoogleMapsDirectionsUrl } from '@/lib/maps';
 import { getLocalizedTag } from '@/lib/tags';
 import { useFavorites } from '@/hooks/useFavorites';
+import { trackSpotView, trackOutboundLink } from '@/lib/analytics';
 
 export default function SpotDetailPage() {
   const params = useParams();
@@ -21,6 +22,14 @@ export default function SpotDetailPage() {
   const spot = getSpotById(params.id as string);
   const [isUpdating, setIsUpdating] = useState(false);
   const [currentReactions, setCurrentReactions] = useState(spot?.reactions || { interested: 0, visited: 0 });
+
+  // スポット閲覧をトラッキング（条件付きでない位置に移動）
+  useEffect(() => {
+    if (spot) {
+      const title = getLocalizedContent(spot.title, language);
+      trackSpotView(spot.id, title);
+    }
+  }, [spot, language]);
 
   if (!spot) {
     return (
@@ -148,6 +157,11 @@ export default function SpotDetailPage() {
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        trackOutboundLink(generateGoogleMapsUrl(spot), 'google_maps_view');
+                        window.open(generateGoogleMapsUrl(spot), '_blank');
+                      }}
                     >
                       📍 {language === 'ja' ? '地図で見る' : 'View on Map'}
                     </a>
@@ -156,6 +170,11 @@ export default function SpotDetailPage() {
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        trackOutboundLink(generateGoogleMapsDirectionsUrl(spot), 'google_maps_directions');
+                        window.open(generateGoogleMapsDirectionsUrl(spot), '_blank');
+                      }}
                     >
                       🚶 {language === 'ja' ? '経路案内' : 'Directions'}
                     </a>

@@ -2,6 +2,7 @@
 
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LANGUAGES, Language } from '@/lib/i18n';
+import { trackLanguageChange } from '@/lib/analytics';
 
 export function LanguageSwitcher() {
   const { language, setLanguage } = useLanguage();
@@ -11,7 +12,10 @@ export function LanguageSwitcher() {
       {Object.entries(LANGUAGES).map(([lang, label]) => (
         <button
           key={lang}
-          onClick={() => setLanguage(lang as Language)}
+          onClick={() => {
+            setLanguage(lang as Language);
+            trackLanguageChange(lang);
+          }}
           className={`px-3 py-1 text-sm rounded ${
             language === lang
               ? 'bg-blue-600 text-white'

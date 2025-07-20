@@ -5,6 +5,7 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { Header } from "@/components/ui/header";
 import { Footer } from "@/components/ui/footer";
 import { NextAuthProvider } from "@/providers/session-provider";
+import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -46,6 +47,7 @@ export default function RootLayout({
             </div>
           </LanguageProvider>
         </NextAuthProvider>
+        <GoogleAnalytics />
       </body>
     </html>
   );

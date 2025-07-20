@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { trackContactSubmit } from '@/lib/analytics';
 
 export default function ContactPage() {
   const { language } = useLanguage();
@@ -42,6 +43,8 @@ export default function ContactPage() {
       if (response.ok) {
         setSubmitStatus('success');
         setFormData({ name: '', email: '', message: '' });
+        // GA4トラッキング
+        trackContactSubmit();
       } else {
         setSubmitStatus('error');
       }
