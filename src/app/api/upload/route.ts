@@ -4,10 +4,15 @@ import { supabase } from '@/lib/supabase';
 
 // 画像アップロードAPI
 export async function POST(request: NextRequest) {
+  console.log('🖼️ [UPLOAD] Starting upload process...');
+  console.log('🔧 Environment:', process.env.NODE_ENV);
+  console.log('🔑 Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL?.substring(0, 30) + '...');
+  
   try {
     // 認証チェック
     const session = await getServerSession();
     if (!session?.user) {
+      console.error('❌ [UPLOAD] Unauthorized - no session');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -21,7 +26,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Supabase Storageのバケット名
-    const bucketName = 'spot-images';
+    const bucketName = 'spot-image';
 
     const uploadedFiles: string[] = [];
 
@@ -47,6 +52,7 @@ export async function POST(request: NextRequest) {
 
       try {
         // ファイルをSupabase Storageにアップロード
+        console.log(`📤 [UPLOAD] Uploading ${file.name} (${file.size} bytes, ${file.type})...`);
         const buffer = await file.arrayBuffer();
         const { data, error } = await supabase.storage
           .from(bucketName)
@@ -57,11 +63,20 @@ export async function POST(request: NextRequest) {
           });
 
         if (error) {
-          console.error(`Error uploading file ${file.name}:`, error);
+          console.error(`❌ [UPLOAD] Supabase error for ${file.name}:`, {
+            message: error.message,
+            status: (error as any).status || 'unknown',
+            statusCode: (error as any).statusCode || 'unknown',
+            details: (error as any).details || 'none',
+            hint: (error as any).hint || 'none'
+          });
           return NextResponse.json({ 
-            error: `Failed to upload file ${file.name}: ${error.message}` 
+            error: `Failed to upload file ${file.name}: ${error.message}`,
+            details: process.env.NODE_ENV === 'development' ? error : undefined
           }, { status: 500 });
         }
+        
+        console.log(`✅ [UPLOAD] Successfully uploaded ${file.name}`);
 
         // 公開URLを生成
         const { data: { publicUrl } } = supabase.storage
@@ -83,9 +98,14 @@ export async function POST(request: NextRequest) {
     }, { status: 200 });
 
   } catch (uploadError) {
-    console.error('Error uploading files:', uploadError);
+    console.error('💥 [UPLOAD] Unexpected error:', {
+      name: uploadError instanceof Error ? uploadError.name : 'Unknown',
+      message: uploadError instanceof Error ? uploadError.message : String(uploadError),
+      stack: uploadError instanceof Error ? uploadError.stack : undefined
+    });
     return NextResponse.json({ 
-      error: 'Internal server error' 
+      error: 'Internal server error',
+      details: process.env.NODE_ENV === 'development' ? String(uploadError) : undefined
     }, { status: 500 });
   }
 }
