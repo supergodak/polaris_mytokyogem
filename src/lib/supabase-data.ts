@@ -92,10 +92,26 @@ function convertSpotToSupabaseInsert(spot: Omit<Spot, 'id' | 'createdAt'>): Spot
 export async function getAllSpots(): Promise<Spot[]> {
   console.log('🌐 [PRODUCTION] Attempting to fetch spots from Supabase...');
   console.log('🔧 Environment:', process.env.NODE_ENV);
-  console.log('🔑 Supabase URL exists:', !!process.env.NEXT_PUBLIC_SUPABASE_URL);
-  console.log('🔑 Supabase Key exists:', !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+  console.log('🔑 Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL?.substring(0, 20) + '...');
+  console.log('🔑 Supabase Key length:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.length);
   
   try {
+    // まず全件検索してデータが存在するか確認
+    console.log('🔍 [TEST] Trying to fetch all spots (no filter)...');
+    const { data: allData, error: allError } = await supabase
+      .from('spots')
+      .select('id, title_ja, is_hidden')
+      .limit(10);
+
+    if (allError) {
+      console.error('❌ [TEST] Error fetching all spots:', allError);
+    } else {
+      console.log('📊 [TEST] Total spots in DB:', allData?.length || 0);
+      console.log('📋 [TEST] Sample data:', allData);
+    }
+
+    // 次に条件付きで検索
+    console.log('🔍 [PRODUCTION] Fetching with is_hidden = false filter...');
     const { data, error } = await supabase
       .from('spots')
       .select('*')
@@ -104,16 +120,26 @@ export async function getAllSpots(): Promise<Spot[]> {
 
     if (error) {
       console.error('❌ [PRODUCTION] Supabase error:', error);
-      console.error('❌ Error details:', JSON.stringify(error, null, 2));
+      console.error('❌ Error code:', error.code);
+      console.error('❌ Error message:', error.message);
+      console.error('❌ Error details:', error.details);
+      console.error('❌ Error hint:', error.hint);
       return [];
     }
 
-    console.log('✅ [PRODUCTION] Supabase success');
-    console.log('📊 [PRODUCTION] Raw data count:', data?.length || 0);
-    console.log('📋 [PRODUCTION] Raw data sample:', data?.[0] || 'No data');
+    console.log('✅ [PRODUCTION] Supabase query success');
+    console.log('📊 [PRODUCTION] Filtered data count:', data?.length || 0);
+    
+    if (data && data.length > 0) {
+      console.log('📋 [PRODUCTION] First spot sample:', {
+        id: data[0].id,
+        title_ja: data[0].title_ja,
+        is_hidden: data[0].is_hidden
+      });
+    }
 
     if (!data || data.length === 0) {
-      console.warn('⚠️ [PRODUCTION] No spots returned from Supabase');
+      console.warn('⚠️ [PRODUCTION] No spots returned from filtered query');
       return [];
     }
 
@@ -123,6 +149,8 @@ export async function getAllSpots(): Promise<Spot[]> {
     return converted;
   } catch (catchError) {
     console.error('💥 [PRODUCTION] Catch block error:', catchError);
+    console.error('💥 Error name:', catchError instanceof Error ? catchError.name : 'Unknown');
+    console.error('💥 Error message:', catchError instanceof Error ? catchError.message : String(catchError));
     return [];
   }
 }
