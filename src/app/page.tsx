@@ -15,8 +15,8 @@ export default function Home() {
       console.log('🏠 [HOME] Starting to fetch spots...');
       setIsLoading(true);
       try {
-        console.log('🚀 [HOME] Calling /api/spots/supabase...');
-        const response = await fetch('/api/spots/supabase');
+        console.log('🚀 [HOME] Calling /api/spots...');
+        const response = await fetch('/api/spots');
         console.log('📡 [HOME] Response status:', response.status);
         
         if (response.ok) {

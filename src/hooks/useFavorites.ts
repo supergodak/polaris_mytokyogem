@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { trackFavoriteAdd, trackFavoriteRemove } from '@/lib/analytics';
-import { getSpotById } from '@/lib/data';
 
 const FAVORITES_STORAGE_KEY = 'mytokyogem_favorites';
 
@@ -44,15 +43,11 @@ export function useFavorites() {
     // 楽観的更新
     saveFavorites(newFavorites);
 
-    // GA4トラッキング
-    const spot = getSpotById(spotId);
-    if (spot) {
-      const spotTitle = spot.title.ja || spot.title.en || spotId;
-      if (isFavorite) {
-        trackFavoriteRemove(spotId, spotTitle);
-      } else {
-        trackFavoriteAdd(spotId, spotTitle);
-      }
+    // GA4トラッキング（スポットIDのみでトラッキング）
+    if (isFavorite) {
+      trackFavoriteRemove(spotId, spotId);
+    } else {
+      trackFavoriteAdd(spotId, spotId);
     }
 
     // APIを呼び出してカウントを更新

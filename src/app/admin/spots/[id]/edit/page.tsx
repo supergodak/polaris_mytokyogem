@@ -263,7 +263,7 @@ export default function EditSpotPage({ params }: { params: Promise<{ id: string 
       
       const newImageData = formData.images.length > 0 ? await Promise.all(imageDataPromises) : [];
       
-      const response = await fetch('/api/admin/spots/supabase', {
+      const response = await fetch('/api/admin/spots', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

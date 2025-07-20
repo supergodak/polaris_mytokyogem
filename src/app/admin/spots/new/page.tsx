@@ -210,7 +210,7 @@ export default function NewSpotPage() {
       
       const imageData = await Promise.all(imageDataPromises);
       
-      const response = await fetch('/api/admin/spots/supabase', {
+      const response = await fetch('/api/admin/spots', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

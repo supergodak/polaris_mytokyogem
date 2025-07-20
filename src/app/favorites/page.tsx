@@ -15,8 +15,8 @@ export default function FavoritesPage() {
   useEffect(() => {
     const fetchFavoriteSpots = async () => {
       try {
-        // Supabase APIからスポット一覧を取得
-        const response = await fetch('/api/spots/supabase');
+        // APIからスポット一覧を取得
+        const response = await fetch('/api/spots');
         if (response.ok) {
           const data = await response.json();
           // お気に入りのスポットのみをフィルタリング
