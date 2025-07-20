@@ -115,8 +115,9 @@ Added via admin panel by ${session.user.email || 'admin'}`;
     
     // GitHub API特有のエラーを詳細に記録
     if (error && typeof error === 'object' && 'status' in error) {
-      console.error('GitHub API Error Status:', (error as any).status);
-      console.error('GitHub API Error Message:', (error as any).message);
+      const githubError = error as { status?: number; message?: string };
+      console.error('GitHub API Error Status:', githubError.status);
+      console.error('GitHub API Error Message:', githubError.message);
     }
     
     // 環境変数の問題かチェック
@@ -224,8 +225,9 @@ Updated via admin panel by ${session.user.email || 'admin'}`;
     
     // GitHub API特有のエラーを詳細に記録
     if (error && typeof error === 'object' && 'status' in error) {
-      console.error('GitHub API Error Status:', (error as any).status);
-      console.error('GitHub API Error Message:', (error as any).message);
+      const githubError = error as { status?: number; message?: string };
+      console.error('GitHub API Error Status:', githubError.status);
+      console.error('GitHub API Error Message:', githubError.message);
     }
     
     // 環境変数の問題かチェック
