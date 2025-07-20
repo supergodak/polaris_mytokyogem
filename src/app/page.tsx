@@ -2,13 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { SpotCard } from '@/components/features/spot-card';
-import { getAllSpotsSync } from '@/lib/data';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Spot } from '@/types/spot';
 
 export default function Home() {
   const { language } = useLanguage();
-  const [spots, setSpots] = useState<Spot[]>(getAllSpotsSync());
+  const [spots, setSpots] = useState<Spot[]>([]);
   const [, setIsLoading] = useState(false);
 
   useEffect(() => {
