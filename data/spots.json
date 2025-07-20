@@ -291,7 +291,63 @@
       },
       "createdBy": "ひとりあそび研究所",
       "createdAt": "2025-01-15T09:00:00.000Z"
+    },
+    {
+      "id": "bar--604495",
+      "title": {
+        "ja": "刺身の美味いローカル居酒屋",
+        "en": "Authentic Local Izakaya Serving Delicious Sashimi"
+      },
+      "description": {
+        "ja": "京王線の幡ヶ谷のローカルな商店街の奥の店。",
+        "en": "A shop located deep within a local shopping street in Hatagaya on the Keio Line."
+      },
+      "shortDescription": {
+        "ja": "京王線の幡ヶ谷のローカルな商店街の奥の店。",
+        "en": "A hidden shop tucked away in the back of a local shopping street in Hatagaya on the Keio Line."
+      },
+      "images": [
+        "/uploads/1752979604313_IMG_1956.jpeg"
+      ],
+      "location": {
+        "lat": 35.675018816081185,
+        "lng": 139.6788133286615,
+        "hideExactLocation": false,
+        "address": {
+          "ja": "東京都渋谷区",
+          "en": "Shibuya, Shibuya-ku, Tokyo"
+        }
+      },
+      "primaryCategory": "bar",
+      "genre": [
+        "sake",
+        "izakaya"
+      ],
+      "travelStyle": [
+        "solo-perfect",
+        "family-restaurant"
+      ],
+      "soloFriendly": true,
+      "businessHours": {
+        "ja": "",
+        "en": ""
+      },
+      "access": {
+        "ja": "",
+        "en": ""
+      },
+      "tips": {
+        "ja": "",
+        "en": ""
+      },
+      "isHidden": false,
+      "reactions": {
+        "interested": 0,
+        "visited": 0
+      },
+      "createdBy": "ひとりあそび研究所",
+      "createdAt": "2025-07-20T02:46:44.495Z"
     }
   ],
-  "lastUpdated": "2025-07-19"
+  "lastUpdated": "2025-07-20"
 }

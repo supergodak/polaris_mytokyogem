@@ -129,40 +129,33 @@ OPENAI_MODEL=gpt-4.1-nano
 # Slack Webhook設定
 SLACK_WEBHOOK_URL=https://hooks.slack.com/services/***
 
-# Supabase設定（ローカル・本番共通）
-NEXT_PUBLIC_SUPABASE_URL=https://atmzwpnfegalqdtqfwpo.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+# Supabase設定（現在は未使用）
+# NEXT_PUBLIC_SUPABASE_URL=https://atmzwpnfegalqdtqfwpo.supabase.co
+# NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
-## Supabase構成
+## データ管理方式
 
-### データベース設計
-- **プロジェクトURL**: https://atmzwpnfegalqdtqfwpo.supabase.co
-- **テーブル**: `spots` (PostgreSQL)
-- **スキーマ**: 既存Spot型と完全互換性
-- **ID形式**: TEXT型（既存IDとの互換性を保持）
+### 現在の構成（JSONファイルベース）
+- **データストア**: `data/spots.json`（ローカルファイル）
+- **運用方法**: ローカル環境で編集 → Git経由で本番反映
+- **制限事項**: Netlifyの本番環境では読み取り専用
 
-### データ統合アーキテクチャ
-```
-ローカル開発環境 ──┐
-                  ├──→ Supabase PostgreSQL
-本番環境 ─────────┘    (同一データベース)
+### 推奨運用フロー
+1. ローカル環境（localhost:3000）で管理画面にログイン
+2. スポットの登録・編集・削除を実行
+3. 変更をGitにコミット・プッシュ
+4. Netlifyが自動的に本番環境にデプロイ
 
-フォールバック: data/spots.json
-```
+### Supabase移行の試み（2025年1月）
+- **背景**: 本番環境での直接編集を可能にするため
+- **実装**: PostgreSQL + Supabase Storage対応
+- **結果**: 技術的には成功したが、運用の複雑さから撤回
+- **判断**: PoCフェーズではJSONファイルで十分と判断
 
-### 環境構成の特徴
-- **一元管理**: ローカル・本番で同じデータベースを共有
-- **リアルタイム同期**: ローカルでの変更が即座に本番に反映
-- **シンプルな運用**: 環境別設定が不要
-- **本番編集対応**: Netlifyの読み取り専用制限を完全解決
-
-### 移行完了事項
-- ✅ 5つのスポットをJSONからSupabaseに移行済み
-- ✅ 全API（CRUD）のSupabase対応完了
-- ✅ 型安全性確保（TypeScript + ESLint）
-- ✅ ビルド成功確認
-- ✅ フォールバック機能実装済み
+### 将来の拡張性
+- データ量が増えた場合はSupabaseへの移行を再検討
+- 現在のコードはSupabase対応の基盤を残している
 
 ## データ構造の変遷
 ### 削除済みフィールド
@@ -231,9 +224,7 @@ src/
 │   └── useFavorites.ts（ローカルストレージ管理）
 ├── lib/               # ユーティリティ
 │   ├── i18n.ts       # 多言語対応
-│   ├── data.ts       # データ取得（Supabase + フォールバック）
-│   ├── supabase.ts   # Supabaseクライアント設定
-│   ├── supabase-data.ts # Supabaseデータアクセス層
+│   ├── data.ts       # データ取得（JSONファイル）
 │   ├── maps.ts       # Google Maps連携
 │   └── tags.ts       # タグシステム（300+タグ定義）
 ├── providers/         # プロバイダー
@@ -242,15 +233,7 @@ src/
     └── spot.ts（createdAt/isHidden追加）
 
 data/
-└── spots.json         # フォールバック用データ（元：5つのサンプル）
-
-scripts/
-├── migrate-to-supabase.js      # データ移行スクリプト（実行済み）
-└── setup-supabase-schema.js    # スキーマ作成スクリプト
-
-ルート/
-├── supabase_schema.sql         # 初期スキーマ（UUID版）
-└── supabase_schema_v2.sql      # 最終スキーマ（TEXT ID版）
+└── spots.json         # メインデータストア（5つのサンプルスポット）
 ```
 
 ## Slack Webhook設定方法
