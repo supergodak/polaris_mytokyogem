@@ -13,18 +13,29 @@ export default function Home() {
 
   useEffect(() => {
     const fetchSpots = async () => {
+      console.log('🏠 [HOME] Starting to fetch spots...');
       setIsLoading(true);
       try {
+        console.log('🚀 [HOME] Calling /api/spots...');
         const response = await fetch('/api/spots');
+        console.log('📡 [HOME] Response status:', response.status);
+        
         if (response.ok) {
           const data = await response.json();
+          console.log('📦 [HOME] API response data:', data);
+          console.log('📋 [HOME] Spots array:', data.spots);
+          console.log('🔢 [HOME] Spots count:', data.spots?.length || 0);
           setSpots(data.spots);
+          console.log('✅ [HOME] State updated with', data.spots?.length || 0, 'spots');
+        } else {
+          console.error('❌ [HOME] Response not ok:', response.status);
         }
       } catch (error) {
-        console.error('Error fetching spots:', error);
+        console.error('💥 [HOME] Error fetching spots:', error);
         // フォールバックとして既存データを使用
       } finally {
         setIsLoading(false);
+        console.log('🏁 [HOME] Fetch completed');
       }
     };
 

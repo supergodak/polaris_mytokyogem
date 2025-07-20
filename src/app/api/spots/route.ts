@@ -73,9 +73,13 @@ export async function POST(request: NextRequest) {
 
 // スポット一覧取得API
 export async function GET() {
+  console.log('🚀 [API] /api/spots called');
+  console.log('🌍 [API] Environment:', process.env.NODE_ENV);
+  
   try {
     // Supabaseから公開スポットを取得
     const spots = await getAllSpots();
+    console.log('📦 [API] Received spots from getAllSpots:', spots.length);
     
     // 既存のJSONレスポンス形式と互換性を保つ
     const response = {
@@ -83,9 +87,10 @@ export async function GET() {
       lastUpdated: new Date().toISOString().split('T')[0]
     };
     
+    console.log('✅ [API] Returning response with', response.spots.length, 'spots');
     return NextResponse.json(response);
   } catch (error) {
-    console.error('Error fetching spots:', error);
+    console.error('❌ [API] Error in GET /api/spots:', error);
     return NextResponse.json({ 
       error: 'Failed to fetch spots' 
     }, { status: 500 });

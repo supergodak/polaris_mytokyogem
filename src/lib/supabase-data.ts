@@ -90,18 +90,41 @@ function convertSpotToSupabaseInsert(spot: Omit<Spot, 'id' | 'createdAt'>): Spot
 
 // 公開スポット一覧取得（非表示スポットを除外）
 export async function getAllSpots(): Promise<Spot[]> {
-  const { data, error } = await supabase
-    .from('spots')
-    .select('*')
-    .eq('is_hidden', false)
-    .order('created_at', { ascending: false });
+  console.log('🌐 [PRODUCTION] Attempting to fetch spots from Supabase...');
+  console.log('🔧 Environment:', process.env.NODE_ENV);
+  console.log('🔑 Supabase URL exists:', !!process.env.NEXT_PUBLIC_SUPABASE_URL);
+  console.log('🔑 Supabase Key exists:', !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+  
+  try {
+    const { data, error } = await supabase
+      .from('spots')
+      .select('*')
+      .eq('is_hidden', false)
+      .order('created_at', { ascending: false });
 
-  if (error) {
-    console.error('Error fetching spots:', error);
+    if (error) {
+      console.error('❌ [PRODUCTION] Supabase error:', error);
+      console.error('❌ Error details:', JSON.stringify(error, null, 2));
+      return [];
+    }
+
+    console.log('✅ [PRODUCTION] Supabase success');
+    console.log('📊 [PRODUCTION] Raw data count:', data?.length || 0);
+    console.log('📋 [PRODUCTION] Raw data sample:', data?.[0] || 'No data');
+
+    if (!data || data.length === 0) {
+      console.warn('⚠️ [PRODUCTION] No spots returned from Supabase');
+      return [];
+    }
+
+    const converted = data.map(convertSupabaseRowToSpot);
+    console.log('🎯 [PRODUCTION] Converted spots count:', converted.length);
+    
+    return converted;
+  } catch (catchError) {
+    console.error('💥 [PRODUCTION] Catch block error:', catchError);
     return [];
   }
-
-  return data.map(convertSupabaseRowToSpot);
 }
 
 // 管理者用スポット一覧取得（非表示スポット含む）
