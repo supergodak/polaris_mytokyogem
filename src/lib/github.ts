@@ -8,8 +8,13 @@ const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 // Octokitインスタンスを作成
 export function getOctokit() {
   if (!GITHUB_TOKEN) {
+    console.error('❌ GITHUB_TOKEN is not set');
+    console.error('Available env vars:', Object.keys(process.env).filter(k => k.includes('GITHUB')));
     throw new Error('GitHub token is not configured');
   }
+  
+  console.log('✅ GitHub client initialized');
+  console.log('📦 Repository:', `${GITHUB_OWNER}/${GITHUB_REPO}`);
   
   return new Octokit({
     auth: GITHUB_TOKEN,

@@ -5,11 +5,16 @@ import { Spot } from '@/types/spot';
 
 // GitHub経由でスポットを作成
 export async function POST(request: NextRequest) {
+  console.log('🔧 [GitHub API] POST request received');
+  
   try {
     // 認証・認可チェック
     const session = await getServerSession();
+    console.log('👤 [GitHub API] Session:', session?.user?.email || 'No user');
+    
     // @ts-expect-error - NextAuth session types need update
     if (!session?.user || session.user?.role !== 'admin') {
+      console.error('❌ [GitHub API] Authorization failed - no admin role');
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
@@ -106,7 +111,23 @@ Added via admin panel by ${session.user.email || 'admin'}`;
     }, { status: 201 });
 
   } catch (error) {
-    console.error('Error creating spot via GitHub:', error);
+    console.error('❌ [GitHub API] Error creating spot:', error);
+    
+    // GitHub API特有のエラーを詳細に記録
+    if (error && typeof error === 'object' && 'status' in error) {
+      console.error('GitHub API Error Status:', (error as any).status);
+      console.error('GitHub API Error Message:', (error as any).message);
+    }
+    
+    // 環境変数の問題かチェック
+    if (error instanceof Error && error.message.includes('GitHub token')) {
+      return NextResponse.json({ 
+        error: 'GitHub configuration error',
+        details: 'GitHub token is not configured. Please check Netlify environment variables.',
+        required: ['GITHUB_TOKEN', 'GITHUB_OWNER', 'GITHUB_REPO']
+      }, { status: 500 });
+    }
+    
     return NextResponse.json({ 
       error: 'Failed to create spot',
       details: error instanceof Error ? error.message : 'Unknown error'
@@ -116,11 +137,16 @@ Added via admin panel by ${session.user.email || 'admin'}`;
 
 // スポットを更新
 export async function PUT(request: NextRequest) {
+  console.log('🔧 [GitHub API] PUT request received');
+  
   try {
     // 認証・認可チェック
     const session = await getServerSession();
+    console.log('👤 [GitHub API] Session:', session?.user?.email || 'No user');
+    
     // @ts-expect-error - NextAuth session types need update
     if (!session?.user || session.user?.role !== 'admin') {
+      console.error('❌ [GitHub API] Authorization failed - no admin role');
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
@@ -194,7 +220,23 @@ Updated via admin panel by ${session.user.email || 'admin'}`;
     });
 
   } catch (error) {
-    console.error('Error updating spot via GitHub:', error);
+    console.error('❌ [GitHub API] Error updating spot:', error);
+    
+    // GitHub API特有のエラーを詳細に記録
+    if (error && typeof error === 'object' && 'status' in error) {
+      console.error('GitHub API Error Status:', (error as any).status);
+      console.error('GitHub API Error Message:', (error as any).message);
+    }
+    
+    // 環境変数の問題かチェック
+    if (error instanceof Error && error.message.includes('GitHub token')) {
+      return NextResponse.json({ 
+        error: 'GitHub configuration error',
+        details: 'GitHub token is not configured. Please check Netlify environment variables.',
+        required: ['GITHUB_TOKEN', 'GITHUB_OWNER', 'GITHUB_REPO']
+      }, { status: 500 });
+    }
+    
     return NextResponse.json({ 
       error: 'Failed to update spot',
       details: error instanceof Error ? error.message : 'Unknown error'
