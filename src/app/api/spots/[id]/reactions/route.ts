@@ -1,16 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs/promises';
-import path from 'path';
-import { Spot } from '@/types/spot';
+import { updateSpotReaction } from '@/lib/supabase-data';
 
-const SPOTS_FILE_PATH = path.join(process.cwd(), 'data/spots.json');
-
-// リアクション更新API
+// リアクション更新API（Supabase対応）
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  console.log('🔧 [Reaction API] POST request for spot ID:', id);
   
   try {
     const { action, type } = await request.json();
@@ -34,42 +31,26 @@ export async function POST(
       }, { status: 400 });
     }
 
-    // スポットデータを読み込み
-    const spotsData = await fs.readFile(SPOTS_FILE_PATH, 'utf-8');
-    const spots = JSON.parse(spotsData);
+    // Supabaseでリアクションを更新
+    const updatedReactions = await updateSpotReaction(id, action, type);
     
-    // 対象スポットを探す
-    const spotIndex = spots.spots.findIndex((spot: Spot) => spot.id === id);
-    
-    if (spotIndex === -1) {
-      return NextResponse.json({ error: 'Spot not found' }, { status: 404 });
-    }
-
-    // リアクション数を更新
-    const currentSpot = spots.spots[spotIndex];
-    const currentReactions = currentSpot.reactions || { interested: 0, visited: 0 };
-    
-    if (action === 'add') {
-      currentReactions[type as keyof typeof currentReactions] = (currentReactions[type as keyof typeof currentReactions] || 0) + 1;
-    } else if (action === 'remove' && currentReactions[type as keyof typeof currentReactions] > 0) {
-      currentReactions[type as keyof typeof currentReactions] = currentReactions[type as keyof typeof currentReactions] - 1;
-    }
-
-    // スポットのリアクションを更新
-    spots.spots[spotIndex].reactions = currentReactions;
-    
-    // ファイルに保存
-    await fs.writeFile(SPOTS_FILE_PATH, JSON.stringify(spots, null, 2), 'utf-8');
+    console.log('✅ [Reaction API] Reaction updated successfully:', {
+      spotId: id,
+      action,
+      type,
+      newReactions: updatedReactions
+    });
 
     return NextResponse.json({ 
       success: true,
-      reactions: currentReactions
+      reactions: updatedReactions
     });
 
   } catch (error) {
-    console.error('Error updating reaction:', error);
+    console.error('❌ [Reaction API] Error updating reaction:', error);
     return NextResponse.json({ 
-      error: 'Internal server error' 
+      error: 'Failed to update reaction',
+      details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
 }

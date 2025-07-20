@@ -259,6 +259,47 @@ export async function deleteSpot(id: string): Promise<void> {
   }
 }
 
+// リアクション更新（Supabase対応）
+export async function updateSpotReaction(
+  id: string, 
+  action: 'add' | 'remove', 
+  type: 'interested' | 'visited'
+): Promise<{ interested: number; visited: number }> {
+  // 現在のスポットを取得
+  const spot = await getSpotById(id);
+  if (!spot) {
+    throw new Error('Spot not found');
+  }
+
+  // リアクション数を計算
+  const currentReactions = spot.reactions || { interested: 0, visited: 0 };
+  const newReactions = { ...currentReactions };
+
+  if (action === 'add') {
+    newReactions[type] = (newReactions[type] || 0) + 1;
+  } else if (action === 'remove' && newReactions[type] > 0) {
+    newReactions[type] = newReactions[type] - 1;
+  }
+
+  // データベースを更新
+  const updateData: Partial<SpotUpdate> = {
+    reactions_interested: newReactions.interested,
+    reactions_visited: newReactions.visited,
+  };
+
+  const { error } = await supabase
+    .from('spots')
+    .update(updateData)
+    .eq('id', id);
+
+  if (error) {
+    console.error('Error updating reaction:', error);
+    throw new Error(`Failed to update reaction: ${error.message}`);
+  }
+
+  return newReactions;
+}
+
 // 画像をSupabase Storageにアップロード
 export async function uploadImageToSupabase(
   file: File | Buffer, 
@@ -276,22 +317,23 @@ export async function uploadImageToSupabase(
     throw new Error(`Failed to upload image: ${error.message}`);
   }
 
-  // 公開URLを取得
-  const { data: urlData } = supabase.storage
-    .from('spot-images')
-    .getPublicUrl(data.path);
-
-  // ダブルスラッシュを修正
-  const cleanUrl = urlData.publicUrl.replace(/\/\/+/g, '/').replace(':/', '://');
-  
   console.log('📸 [Storage] Upload successful:', {
     fileName,
     path: data.path,
-    originalUrl: urlData.publicUrl,
-    cleanUrl
+    fullPath: data.fullPath,
   });
 
-  return cleanUrl;
+  // URLの問題を詳しく調査するため、複数の方法を試す
+  const pathWithoutLeadingSlash = data.path.startsWith('/') ? data.path.substring(1) : data.path;
+  const { data: urlData } = supabase.storage.from('spot-images').getPublicUrl(pathWithoutLeadingSlash);
+  
+  console.log('📸 [Storage] URL generated:', {
+    originalPath: data.path,
+    cleanPath: pathWithoutLeadingSlash,
+    finalUrl: urlData.publicUrl
+  });
+
+  return urlData.publicUrl;
 }
 
 // Base64画像をSupabase Storageにアップロード

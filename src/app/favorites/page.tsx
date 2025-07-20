@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { SpotCard } from '@/components/features/spot-card';
-import { getAllSpotsSync } from '@/lib/data';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useFavorites } from '@/hooks/useFavorites';
 import { Spot } from '@/types/spot';
@@ -14,10 +13,26 @@ export default function FavoritesPage() {
   const [favoriteSpots, setFavoriteSpots] = useState<Spot[]>([]);
 
   useEffect(() => {
-    // お気に入りのスポットのみをフィルタリング
-    const allSpots = getAllSpotsSync();
-    const filtered = allSpots.filter(spot => favoriteIds.includes(spot.id));
-    setFavoriteSpots(filtered);
+    const fetchFavoriteSpots = async () => {
+      try {
+        // Supabase APIからスポット一覧を取得
+        const response = await fetch('/api/spots/supabase');
+        if (response.ok) {
+          const data = await response.json();
+          // お気に入りのスポットのみをフィルタリング
+          const filtered = data.spots.filter((spot: Spot) => favoriteIds.includes(spot.id));
+          setFavoriteSpots(filtered);
+        }
+      } catch (error) {
+        console.error('Error fetching favorite spots:', error);
+      }
+    };
+
+    if (favoriteIds.length > 0) {
+      fetchFavoriteSpots();
+    } else {
+      setFavoriteSpots([]);
+    }
   }, [favoriteIds]);
 
   const heading = language === 'ja' 
