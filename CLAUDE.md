@@ -46,10 +46,11 @@
 - ✅ Header コンポーネント（統一表記対応）
 - ✅ Footer コンポーネント（法的リンク・お問い合わせ）
 - ✅ v0での差し替えを想定したシンプル設計
+- ✅ **SpotCard v2.0** - Vercel v0ベースのモダンデザイン適用（2025年1月20日）
 
 ### 5. フロントエンド機能
 - ✅ スポット一覧ページ（カード形式レイアウト）
-- ✅ SpotCard コンポーネント
+- ✅ **SpotCard v2.0** - モダンデザイン適用済み（Lucide React、ホバーエフェクト、backdrop-blur）
 - ✅ スポット詳細ページ（/spots/[id]）
 - ✅ 言語切り替え対応
 - ✅ Google Maps URLリンク連携（緯度経度パラメータ）
@@ -166,8 +167,8 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 - **データベース**: spotsテーブル（RLS無効化、anon権限付与）
 - **ストレージ**: spot-imagesバケット（Public設定、画像アップロード権限）
 - **API構成**: 
-  - `/api/spots/supabase` - 一般向けスポット取得
-  - `/api/admin/spots/supabase` - 管理者向けCRUD操作
+  - `/api/spots` - 一般向けスポット取得（統一済み）
+  - `/api/admin/spots` - 管理者向けCRUD操作（統一済み）
   - `/api/spots/[id]` - 個別スポット操作（Supabase対応）
   - `/api/spots/[id]/reactions` - リアクション機能（Supabase対応）
 
@@ -180,6 +181,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 - ✅ `isHidden` - 非表示フラグ（下書き保存用）
 
 ## 次回実装予定
+- [ ] 管理者用API GET機能追加（getAllSpotsForAdmin対応）
 - [ ] SNS共有機能の実装
 - [ ] レスポンシブデザインの細かい調整
 - [ ] 利用規約ページ作成
@@ -231,7 +233,7 @@ src/
 │   │   ├── image-gallery.tsx（モバイル対応）
 │   │   └── location-picker.tsx
 │   └── features/      # 機能固有コンポーネント
-│       └── spot-card.tsx（気になる機能付き）
+│       └── spot-card.tsx（v2.0 - Vercel v0ベースモダンデザイン）
 ├── contexts/          # React Context
 │   └── LanguageContext.tsx
 ├── hooks/             # Custom Hooks
@@ -277,6 +279,30 @@ data/
 - ✅ スポット編集フォームのGitHub API呼び出し削除
 - ✅ 管理画面、お気に入りページのSupabase API対応
 - ✅ リアクション機能のSupabase対応
+
+## UI改善（SpotCard v2.0）- 2025年1月20日
+### 実装内容
+- **Vercel v0活用**: プロンプト「Create a responsive spot card component for a travel app」で生成
+- **Lucide React導入**: Heart、MapPin、ExternalLinkアイコンでモダンな統一感
+- **デザイン刷新**: 
+  - `rounded-2xl` より丸い角丸
+  - `hover:shadow-xl` 立体的なホバーエフェクト  
+  - `group-hover:scale-105` 画像拡大効果
+  - `backdrop-blur-sm` ガラス効果のハートボタン
+  - `aspect-[4/3]` 統一されたアスペクト比
+  - グラデーションオーバーレイ
+- **技術的改善**:
+  - ネストした`<a>`タグエラー解決（Linkをタイトルとボタンのみに適用）
+  - Next.js Image `sizes`プロパティ追加で警告解決
+  - 既存機能（多言語対応、お気に入り、地図リンク）完全維持
+  - TypeScript型安全性保持
+
+### 改善結果
+- ✅ モダンで洗練されたカードデザイン
+- ✅ ネストリンクエラー完全解決
+- ✅ パフォーマンス最適化
+- ✅ 既存機能100%互換性維持
+- ✅ ビルド・ESLintエラーゼロ
 
 ## トラブルシューティング
 - **認証エラー**: `.env.local`の環境変数設定を確認
