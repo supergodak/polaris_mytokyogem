@@ -45,10 +45,25 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const { spot, images } = await request.json();
+    let spot, images;
+    try {
+      const body = await request.json();
+      spot = body.spot;
+      images = body.images;
+      console.log('📥 [Supabase API] Request body parsed:', {
+        hasSpot: !!spot,
+        imageCount: images?.length || 0
+      });
+    } catch (parseError) {
+      console.error('❌ [Supabase API] Failed to parse request body:', parseError);
+      return NextResponse.json({ 
+        error: 'Invalid request body',
+        details: parseError instanceof Error ? parseError.message : 'Unknown error'
+      }, { status: 400 });
+    }
     
     // バリデーション
-    if (!spot.title?.ja || !spot.primaryCategory) {
+    if (!spot?.title?.ja || !spot?.primaryCategory) {
       return NextResponse.json({ 
         error: 'Required fields missing' 
       }, { status: 400 });
@@ -61,23 +76,46 @@ export async function POST(request: NextRequest) {
     const imageUrls: string[] = [];
     
     if (images && images.length > 0) {
+      console.log(`📸 [Supabase API] Processing ${images.length} images`);
+      
       for (let i = 0; i < images.length; i++) {
         const imageData = images[i];
+        console.log(`📸 [Supabase API] Processing image ${i + 1}:`, {
+          type: typeof imageData,
+          isString: typeof imageData === 'string',
+          startsWithDataImage: typeof imageData === 'string' ? imageData.startsWith('data:image/') : false,
+          length: typeof imageData === 'string' ? imageData.length : 0
+        });
+        
         // Base64データかチェック
         if (typeof imageData === 'string' && imageData.startsWith('data:image/')) {
           const base64Data = imageData.split(',')[1];
           const fileName = `${id}_${Date.now()}_${i}.jpg`;
           
           try {
+            console.log(`📸 [Supabase API] Uploading image: ${fileName}`);
             const imageUrl = await uploadBase64ImageToSupabase(base64Data, fileName);
             imageUrls.push(imageUrl);
-            console.log(`✅ [Supabase API] Image uploaded: ${fileName}`);
+            console.log(`✅ [Supabase API] Image uploaded successfully: ${fileName} -> ${imageUrl}`);
           } catch (uploadError) {
             console.error(`❌ [Supabase API] Image upload failed: ${fileName}`, uploadError);
+            // エラーの詳細をログ
+            if (uploadError instanceof Error) {
+              console.error('Error details:', {
+                message: uploadError.message,
+                stack: uploadError.stack
+              });
+            }
             // 画像アップロードの失敗はスポット作成をブロックしない
           }
+        } else {
+          console.warn(`⚠️ [Supabase API] Skipping invalid image data at index ${i}`);
         }
       }
+      
+      console.log(`📸 [Supabase API] Image processing completed. Uploaded: ${imageUrls.length}/${images.length}`);
+    } else {
+      console.log('📸 [Supabase API] No images to process');
     }
     
     // 新しいスポットデータを作成
@@ -122,6 +160,15 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('❌ [Supabase API] Error creating spot:', error);
+    
+    // エラーの詳細をログ
+    if (error instanceof Error) {
+      console.error('Error details:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
+    }
     
     return NextResponse.json({ 
       error: 'Failed to create spot',

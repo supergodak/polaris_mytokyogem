@@ -222,8 +222,19 @@ export default function NewSpotPage() {
       });
       
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || errorData.details || 'スポットの作成に失敗しました');
+        let errorMessage = 'スポットの作成に失敗しました';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorData.details || errorMessage;
+        } catch (parseError) {
+          // JSONパースに失敗した場合、テキストとして取得
+          try {
+            errorMessage = await response.text();
+          } catch {
+            errorMessage = `HTTPエラー: ${response.status} ${response.statusText}`;
+          }
+        }
+        throw new Error(errorMessage);
       }
       
       const data = await response.json();
