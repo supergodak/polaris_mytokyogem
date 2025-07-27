@@ -305,6 +305,12 @@ export async function uploadImageToSupabase(
   file: File | Buffer, 
   fileName: string
 ): Promise<string> {
+  console.log('📸 [Storage] Starting upload:', {
+    fileName,
+    fileSize: file instanceof Buffer ? file.length : file instanceof File ? file.size : 'unknown',
+    fileType: file instanceof File ? file.type : 'Buffer/image/jpeg'
+  });
+
   const { data, error } = await supabase.storage
     .from('spot-images')
     .upload(fileName, file, {
@@ -313,7 +319,13 @@ export async function uploadImageToSupabase(
     });
 
   if (error) {
-    console.error('Error uploading image:', error);
+    console.error('❌ [Storage] Upload failed:', {
+      error: error.message,
+      statusCode: error.statusCode,
+      details: error,
+      fileName,
+      bucket: 'spot-images'
+    });
     throw new Error(`Failed to upload image: ${error.message}`);
   }
 

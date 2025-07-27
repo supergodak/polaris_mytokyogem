@@ -279,8 +279,19 @@ export default function EditSpotPage({ params }: { params: Promise<{ id: string 
       });
       
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || errorData.details || 'スポットの更新に失敗しました');
+        let errorMessage = 'スポットの更新に失敗しました';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorData.details || errorMessage;
+        } catch (parseError) {
+          // JSONパースに失敗した場合、テキストとして取得
+          try {
+            errorMessage = await response.text();
+          } catch {
+            errorMessage = `HTTPエラー: ${response.status} ${response.statusText}`;
+          }
+        }
+        throw new Error(errorMessage);
       }
       
       const data = await response.json();

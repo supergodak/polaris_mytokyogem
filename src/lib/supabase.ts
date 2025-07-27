@@ -4,6 +4,25 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
+// 環境変数チェック
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('❌ [Supabase] Missing environment variables:', {
+    hasUrl: !!supabaseUrl,
+    hasKey: !!supabaseAnonKey,
+    url: supabaseUrl ? '✓ Set' : '✗ Missing',
+    key: supabaseAnonKey ? '✓ Set' : '✗ Missing'
+  });
+  throw new Error('Supabase environment variables are not configured');
+}
+
+// 本番環境チェック
+if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
+  console.log('🌐 [Supabase] Production environment detected:', {
+    hostname: window.location.hostname,
+    url: supabaseUrl.substring(0, 30) + '...',
+  });
+}
+
 // Supabaseクライアントを作成
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 

@@ -90,13 +90,15 @@ export function ImageUpload({ onImagesChange, maxImages = 5, existingImages = []
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {existingImages.map((url, index) => (
               <div key={`existing-${index}`} className="relative group">
-                <Image
-                  src={url}
-                  alt={`既存画像 ${index + 1}`}
-                  width={128}
-                  height={128}
-                  className="w-full h-32 object-cover rounded-lg border border-gray-200"
-                />
+                <div className="relative w-full h-32">
+                  <Image
+                    src={url}
+                    alt={`既存画像 ${index + 1}`}
+                    fill
+                    className="object-cover rounded-lg border border-gray-200"
+                    sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                  />
+                </div>
                 <button
                   type="button"
                   onClick={() => removeExistingImage(index)}
@@ -119,13 +121,15 @@ export function ImageUpload({ onImagesChange, maxImages = 5, existingImages = []
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {previewUrls.map((url, index) => (
               <div key={`new-${index}`} className="relative group">
-                <Image
-                  src={url}
-                  alt={`プレビュー ${index + 1}`}
-                  width={128}
-                  height={128}
-                  className="w-full h-32 object-cover rounded-lg border border-gray-200"
-                />
+                <div className="relative w-full h-32">
+                  <Image
+                    src={url}
+                    alt={`プレビュー ${index + 1}`}
+                    fill
+                    className="object-cover rounded-lg border border-gray-200"
+                    sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                  />
+                </div>
                 <button
                   type="button"
                   onClick={() => removeImage(index)}

@@ -192,7 +192,24 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const { id, spot, images } = await request.json();
+    let id, spot, images;
+    try {
+      const body = await request.json();
+      id = body.id;
+      spot = body.spot;
+      images = body.images;
+      console.log('📥 [Supabase API] PUT request body parsed:', {
+        id,
+        hasSpot: !!spot,
+        imageCount: images?.length || 0
+      });
+    } catch (parseError) {
+      console.error('❌ [Supabase API] Failed to parse PUT request body:', parseError);
+      return NextResponse.json({ 
+        error: 'Invalid request body',
+        details: parseError instanceof Error ? parseError.message : 'Unknown error'
+      }, { status: 400 });
+    }
     
     // 既存のスポットを確認
     const existingSpot = await getSpotById(id);
@@ -204,23 +221,45 @@ export async function PUT(request: NextRequest) {
     const imageUrls: string[] = [...(spot.images || [])];
     
     if (images && images.length > 0) {
+      console.log(`📸 [Supabase API] Processing ${images.length} images for update`);
+      
       for (let i = 0; i < images.length; i++) {
         const imageData = images[i];
+        console.log(`📸 [Supabase API] Processing update image ${i + 1}:`, {
+          type: typeof imageData,
+          isString: typeof imageData === 'string',
+          startsWithDataImage: typeof imageData === 'string' ? imageData.startsWith('data:image/') : false,
+          length: typeof imageData === 'string' ? imageData.length : 0
+        });
+        
         if (typeof imageData === 'string' && imageData.startsWith('data:image/')) {
           // 新しい画像
           const base64Data = imageData.split(',')[1];
           const fileName = `${id}_${Date.now()}_${i}.jpg`;
           
           try {
+            console.log(`📸 [Supabase API] Uploading update image: ${fileName}`);
             const imageUrl = await uploadBase64ImageToSupabase(base64Data, fileName);
             imageUrls.push(imageUrl);
-            console.log(`✅ [Supabase API] Image uploaded: ${fileName}`);
+            console.log(`✅ [Supabase API] Update image uploaded successfully: ${fileName} -> ${imageUrl}`);
           } catch (uploadError) {
-            console.error(`❌ [Supabase API] Image upload failed: ${fileName}`, uploadError);
+            console.error(`❌ [Supabase API] Update image upload failed: ${fileName}`, uploadError);
+            if (uploadError instanceof Error) {
+              console.error('Upload error details:', {
+                message: uploadError.message,
+                stack: uploadError.stack
+              });
+            }
             // 画像アップロードの失敗は更新をブロックしない
           }
+        } else {
+          console.warn(`⚠️ [Supabase API] Skipping invalid update image data at index ${i}`);
         }
       }
+      
+      console.log(`📸 [Supabase API] Update image processing completed. Total images: ${imageUrls.length}`);
+    } else {
+      console.log('📸 [Supabase API] No new images to process for update');
     }
     
     // スポットを更新
@@ -241,6 +280,15 @@ export async function PUT(request: NextRequest) {
 
   } catch (error) {
     console.error('❌ [Supabase API] Error updating spot:', error);
+    
+    // エラーの詳細をログ
+    if (error instanceof Error) {
+      console.error('Update error details:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
+    }
     
     return NextResponse.json({ 
       error: 'Failed to update spot',
